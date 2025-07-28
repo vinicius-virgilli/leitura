@@ -1,67 +1,72 @@
-# leitura
+# 📚 Projeto Leitura
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Este é um projeto pessoal desenvolvido com o objetivo de organizar e acompanhar minha **lista de leitura** — contemplando livros que estou lendo, que já li ou pretendo ler, independentemente de possuí-los fisicamente.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## 🚀 Tecnologias utilizadas
 
-## Running the application in dev mode
+- **Java 17**
+- **Quarkus** (framework leve e moderno para aplicações Java)
+- **H2 Database** (persistente em disco)
+- **REST API** com padrão RESTful
 
-You can run your application in dev mode that enables live coding using:
+## 🎯 Objetivo
 
-```shell script
+Gerenciar minha **leitura** com os seguintes dados:
+- Nome do livro
+- Número total de páginas
+- Progresso da leitura (páginas lidas, página que eu deveria estar atualmente, etc.)
+- Ordem de leitura
+- Status da leitura (por ler, lendo, lido)
+- Datas de início e término da leitura
+
+## ✅ MVP já implementado
+
+- Cadastro de livros na lista de leitura
+- Listagem completa
+- Banco de dados H2 persistente em disco (`./data/leitura.mv.db`)
+- Lógica para definir ordem de leitura automaticamente
+- Inicialização automática do banco com base nas models
+
+## 🧠 Em andamento
+
+- Cálculo automático de página atual e progresso  
+  (atualizado automaticamente ao adicionar um livro ou por meio de **agendamento diário**)
+- Diferenciação entre leitura **intelectual** e **espiritual**, com ajustes de dias úteis (ex: sem leitura espiritual aos domingos)
+- Integração futura com o **Google Agenda** para registrar diariamente a página que devo estar em cada tipo de leitura
+- Interface frontend (futuramente em React ou Vue)
+- Deploy gratuito na nuvem (pesquisa em andamento)
+
+## 🔧 Como rodar o projeto localmente
+
+
+```bash
+1. Clone este repositório:
+git clone https://github.com/seu-usuario/leitura.git
+
+2. Acesse a pasta:
+cd leitura
+
+3. Execute a aplicação (modo dev):
 ./mvnw quarkus:dev
+
+4. Acesse a API local em:
+http://localhost:8080
+
+Obs: O banco H2 salva os dados em disco, então ao reiniciar, os dados são mantidos.
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+🤝 Contribuições
+Pull Requests são bem-vindos!
+Se quiser contribuir:
 
-## Packaging and running the application
+Faça um fork
 
-The application can be packaged using:
+Crie uma branch (feature/nome)
 
-```shell script
-./mvnw package
-```
+Commit e push das alterações
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Abra um Pull Request explicando sua contribuição
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Autor: Vinicius Virgilli
 
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/leitura-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-
-## Provided Code
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+Projeto pessoal em andamento 🚧
