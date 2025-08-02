@@ -1,4 +1,4 @@
-#Maven
+# Maven
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -13,7 +13,7 @@ release.properties
 bin/
 
 # IntelliJ
-.idea
+.idea/
 *.ipr
 *.iml
 *.iws
@@ -21,28 +21,29 @@ bin/
 # NetBeans
 nb-configuration.xml
 
-# Visual Studio Code
-.vscode
+# VS Code
+.vscode/
 .factorypath
 
-# OSX
+# macOS
 .DS_Store
 
 # Vim
 *.swp
 *.swo
 
-# patch
+# Patch/merge
 *.orig
 *.rej
 
-# Local environment
+# Ambiente local
 .env
 
-# Plugin directory
+# Quarkus CLI plugins
 /.quarkus/cli/plugins/
-# TLS Certificates
+
+# Certificados locais
 .certs/
 
-# Data
-postgres-da/ta
+# Dados do PostgreSQL
+postgres-data/

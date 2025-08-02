@@ -1,4 +1,13 @@
-*
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+# Ignorar diretórios e arquivos desnecessários
+.git
+.idea
+.vscode
+*.iml
+*.log
+target/
+postgres-data/
+docker-compose.yml
+
+# Opcional: ignora certificados locais e envs
+.env
+.certs/

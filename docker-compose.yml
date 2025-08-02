@@ -17,6 +17,7 @@ services:
     build: .
     depends_on:
       - db
+    restart: on-failure
     ports:
       - "8080:8080"
     environment:
