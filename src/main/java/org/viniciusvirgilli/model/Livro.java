@@ -3,7 +3,8 @@ package org.viniciusvirgilli.model;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.viniciusvirgilli.enums.StatusLeitura;
+import org.viniciusvirgilli.enums.CategoriaLivroEnum;
+import org.viniciusvirgilli.enums.StatusLeituraEnum;
 
 import java.time.LocalDate;
 
@@ -22,7 +23,10 @@ public class Livro extends PanacheEntity {
     private Integer totalPaginas;
 
     @Enumerated(EnumType.STRING)
-    private StatusLeitura status;
+    private StatusLeituraEnum status;
+
+    @Enumerated(EnumType.STRING)
+    private CategoriaLivroEnum categoria;
 
     private LocalDate inicioLeitura;
     private LocalDate terminoLeitura;
