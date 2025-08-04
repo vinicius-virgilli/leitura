@@ -11,7 +11,7 @@ FROM eclipse-temurin:17-jdk-alpine
 RUN apk add --no-cache tzdata \
     && cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime \
     && echo "America/Sao_Paulo" > /etc/timezone \
-    && apk del tzdata \
+    && apk del tzdata
 
 WORKDIR /app
 COPY --from=build /app/target/*-runner.jar app.jar
