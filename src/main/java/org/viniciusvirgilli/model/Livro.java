@@ -2,6 +2,7 @@ package org.viniciusvirgilli.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
@@ -22,6 +23,7 @@ public class Livro extends PanacheEntity {
     @Column(nullable = false)
     private Integer totalPaginas;
 
+    @Column(nullable = false, columnDefinition = "varchar default 'A_LER'")
     @Enumerated(EnumType.STRING)
     private StatusLeituraEnum status;
 
@@ -35,4 +37,5 @@ public class Livro extends PanacheEntity {
     private Integer paginasLidas;
     private String progresso;
     private Integer ordemDeLeitura;
+    private Integer quantidadeVezesLido;
 }

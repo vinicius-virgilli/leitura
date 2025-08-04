@@ -1,0 +1,310 @@
+{
+	"info": {
+		"_postman_id": "9a54506d-7f09-4e9e-875f-3b03747bc639",
+		"name": "zzz - leitura (local)",
+		"description": "APIs de consulta do extrato PIX dos clientes CAIXA, para ser utilizada pelos canais.\n\n# Authentication\n\n<!-- ReDoc-Inject: <security-definitions> -->\n\nContact Support:\n Name: SUDEB08\n Email: pix@caixa.com.br",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39992751"
+	},
+	"item": [
+		{
+			"name": "metricas",
+			"item": [
+				{
+					"name": "buscar metricas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/metricas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"metricas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cadastrar metrica",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"categoria\": \"INTELECTUAL\",\r\n  \"dataBase\": \"2025-07-12\",\r\n  \"paginasPorDia\": 10,\r\n  \"diasSemanaLeitura\": [\"MONDAY\", \"WEDNESDAY\", \"FRIDAY\"]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/metricas",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"metricas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletar metrica",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/metricas?categoria=INTELECTUAL",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"metricas"
+							],
+							"query": [
+								{
+									"key": "categoria",
+									"value": "INTELECTUAL"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "livros",
+			"item": [
+				{
+					"name": "buscar livro por Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/livros/402",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"livros",
+								"402"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "buscar livros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/livros",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"livros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cadastrar livro",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"nome\",\r\n    \"totalPaginas\": 604,\r\n    \"totalSaldo\": 50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/livros",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"livros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "atualizar saldo do livro",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/livros/saldo/atualizar/?livroId=402&saldo=-30",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"livros",
+								"saldo",
+								"atualizar",
+								""
+							],
+							"query": [
+								{
+									"key": "livroId",
+									"value": "402"
+								},
+								{
+									"key": "saldo",
+									"value": "-30"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletar livro",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/livros?livroId=303",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"livros"
+							],
+							"query": [
+								{
+									"key": "livroId",
+									"value": "303"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "progresso",
+			"item": [
+				{
+					"name": "atualizar progresso dos livros",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/livros/progresso/atualizar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"livros",
+								"progresso",
+								"atualizar"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// /*\r",
+					"// POST TOKEN SPI\r",
+					"// */\r",
+					"pm.sendRequest({\r",
+					"  url: 'https://login.des.caixa/auth/realms/intranet/protocol/openid-connect/token',\r",
+					"  method: 'POST',\r",
+					"  header: {\r",
+					"    'Content-Type': 'application/x-www-form-urlencoded'\r",
+					"  },\r",
+					"  body: {\r",
+					"    mode: 'urlencoded',\r",
+					"    urlencoded: [\r",
+					"      {\r",
+					"        'key': 'grant_type',\r",
+					"        'value': 'client_credentials'\r",
+					"      },\r",
+					"      {\r",
+					"        'key': 'client_id',\r",
+					"        'value': 'cli-ser-spi'\r",
+					"      },\r",
+					"      {\r",
+					"        'key': 'client_secret',\r",
+					"        'value': '1938b188-42c7-4889-bf3a-7d95e4432fe9'\r",
+					"      },\r",
+					"      {\r",
+					"        'key': 'scope',\r",
+					"        'value': 'email lotecobv.write cobv.write profile payloadlocation.read cob.read cob.write pix.write cobv.read payloadlocation.write webhook.write webhook.read pix.read lotecobv.read'\r",
+					"      }\r",
+					"    ]\r",
+					"  }\r",
+					"}, function (err, res) {\r",
+					"  var resultado = res.json();\r",
+					"  console.log(\"POST TOKEN SPI\")\r",
+					"  pm.collectionVariables.set(\"spi_service_token\", resultado.access_token);\r",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://api.des.caixa:8443/transacoes-financeiras/pagamentos-instantaneos/extrato/"
+		},
+		{
+			"key": "spi_service_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

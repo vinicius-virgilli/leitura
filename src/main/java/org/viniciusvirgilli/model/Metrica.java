@@ -4,8 +4,9 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
-
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,4 +24,10 @@ public class Metrica extends PanacheEntity {
     private Integer totalLivrosLidos;
     private LocalDate dataBase;
 
-    }
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "dias_semana_leitura", joinColumns = @JoinColumn(name = "metrica_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "dia")
+    private List<DayOfWeek> diasSemanaLeitura;
+
+}

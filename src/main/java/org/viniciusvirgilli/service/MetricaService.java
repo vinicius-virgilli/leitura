@@ -20,17 +20,37 @@ public class MetricaService {
         Metrica metrica = new Metrica();
         metrica.setCategoria(dto.getCategoria());
         metrica.setDataBase(dto.getDataBase());
+        metrica.setDiasSemanaLeitura(dto.getDiasSemanaLeitura());
+        metrica.setPaginasPorDia(dto.getPaginasPorDia());
 
         metrica.persist();
 
         return metrica;
     }
 
+
     private boolean metricaJaExiste(CategoriaLivroEnum categoria) {
-        return Metrica.find("categoria", categoria).firstResult() != null;
+        return buscarPorCategoria(categoria) != null;
     }
+
 
     public List<Metrica> listarTodos() {
         return Metrica.listAll();
+    }
+
+
+    public Metrica buscarPorCategoria(CategoriaLivroEnum categoriaLivroEnum) {
+        return Metrica.find("categoria", categoriaLivroEnum).firstResult();
+    }
+
+
+    @Transactional
+    public void deletarMetrica(CategoriaLivroEnum categoriaLivroEnum) {
+        Metrica metrica = buscarPorCategoria(categoriaLivroEnum);
+        if (metrica != null) {
+            metrica.delete();
+        } else {
+            throw new IllegalArgumentException("Métrica não encontrada.");
+        }
     }
 }

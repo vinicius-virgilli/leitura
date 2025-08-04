@@ -1,9 +1,9 @@
 package org.viniciusvirgilli.enums;
 
 public enum StatusLeituraEnum {
-    TO_READ("A ler"),
-    READING("Lendo"),
-    READ("Lido");
+    A_LER("A ler"),
+    LENDO("Lendo"),
+    LIDO("Lido");
 
     private final String label;
 
