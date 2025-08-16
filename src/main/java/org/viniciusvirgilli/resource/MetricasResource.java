@@ -4,6 +4,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.ApiResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.ApiResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.MetricaCriacaoDto;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
 import org.viniciusvirgilli.model.Metrica;
@@ -16,6 +23,7 @@ import org.jboss.logging.Logger;
 @Path("/metricas")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Métricas", description = "Operações relacionadas às métricas de leitura")
 public class MetricasResource {
     private static final Logger LOG = Logger.getLogger(MetricasResource.class);
 

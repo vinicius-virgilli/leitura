@@ -4,6 +4,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.ApiResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.ApiResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.LivroCriacaoDto;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
 import org.viniciusvirgilli.model.Livro;
@@ -17,6 +24,7 @@ import java.util.List;
 @Path("/livros")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Livros", description = "Operações relacionadas ao gerenciamento de livros")
 public class LivroResource {
 
     private static final Logger LOG = Logger.getLogger(LivroResource.class);
@@ -31,6 +39,13 @@ public class LivroResource {
     AtualizaProgressoLeituraService atualizaProgressoLeituraService;
 
     @POST
+    @Operation(summary = "Criar um novo livro", description = "Cria um novo livro no sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Livro criado com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public Response criarLivro(LivroCriacaoDto livro) {
         try {
             LOG.infof("Requisição para criar livro recebida: %s", livro.getNome());
@@ -50,6 +65,9 @@ public class LivroResource {
     }
 
     @GET
+    @Operation(summary = "Listar todos os livros", description = "Retorna uma lista com todos os livros cadastrados")
+    @ApiResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class)))
     public List<Livro> listarLivros() {
         LOG.info("Requisição para listar todos os livros");
 
@@ -58,7 +76,13 @@ public class LivroResource {
 
     @GET
     @Path("/{livroId}")
-    public Livro buscarLivroPorId(@PathParam("livroId") Integer livroId) {
+    @Operation(summary = "Buscar livro por ID", description = "Retorna um livro específico pelo seu ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Livro encontrado",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class))),
+        @ApiResponse(responseCode = "404", description = "Livro não encontrado")
+    })
+    public Livro buscarLivroPorId(@Parameter(description = "ID do livro", required = true) @PathParam("livroId") Integer livroId) {
         LOG.infof("Requisição para listar livro com ID=%d", livroId);
 
         try {
