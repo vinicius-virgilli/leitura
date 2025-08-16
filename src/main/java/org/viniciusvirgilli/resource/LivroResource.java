@@ -8,8 +8,8 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-import org.eclipse.microprofile.openapi.annotations.responses.ApiResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.ApiResponses;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.LivroCriacaoDto;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
@@ -40,11 +40,11 @@ public class LivroResource {
 
     @POST
     @Operation(summary = "Criar um novo livro", description = "Cria um novo livro no sistema")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Livro criado com sucesso",
+    @APIResponses(value = {
+        @APIResponse(responseCode = "201", description = "Livro criado com sucesso",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class))),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
-        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+        @APIResponse(responseCode = "400", description = "Dados inválidos"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     public Response criarLivro(LivroCriacaoDto livro) {
         try {
@@ -66,7 +66,7 @@ public class LivroResource {
 
     @GET
     @Operation(summary = "Listar todos os livros", description = "Retorna uma lista com todos os livros cadastrados")
-    @ApiResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
+    @APIResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class)))
     public List<Livro> listarLivros() {
         LOG.info("Requisição para listar todos os livros");
@@ -77,10 +77,10 @@ public class LivroResource {
     @GET
     @Path("/{livroId}")
     @Operation(summary = "Buscar livro por ID", description = "Retorna um livro específico pelo seu ID")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Livro encontrado",
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Livro encontrado",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class))),
-        @ApiResponse(responseCode = "404", description = "Livro não encontrado")
+        @APIResponse(responseCode = "404", description = "Livro não encontrado")
     })
     public Livro buscarLivroPorId(@Parameter(description = "ID do livro", required = true) @PathParam("livroId") Integer livroId) {
         LOG.infof("Requisição para listar livro com ID=%d", livroId);
@@ -96,7 +96,15 @@ public class LivroResource {
 
     @PUT
     @Path("/status/atualizar")
-    public Livro atualizarStatusLivro(@QueryParam("livroId") Integer livroId, @QueryParam("status") StatusLeituraEnum status) {
+    @Operation(summary = "Atualizar status do livro", description = "Atualiza o status de leitura de um livro específico")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Status do livro atualizado com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class))),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Livro atualizarStatusLivro(
+            @Parameter(description = "ID do livro", required = true) @QueryParam("livroId") Integer livroId,
+            @Parameter(description = "Novo status de leitura", required = true) @QueryParam("status") StatusLeituraEnum status) {
         try {
             LOG.infof("Requisição para atualizar status do livro: ID=%d, Status=%s", livroId, status);
 
@@ -112,6 +120,11 @@ public class LivroResource {
 
     @POST
     @Path("/progresso/atualizar")
+    @Operation(summary = "Atualizar progresso manualmente", description = "Executa manualmente a atualização do progresso de leitura de todos os livros")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Progresso atualizado com sucesso"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public Response atualizarProgressoManual() {
         try {
             LOG.info("Requisição manual para atualizar progresso dos livros");
@@ -141,7 +154,13 @@ public class LivroResource {
     }
 
     @DELETE
-    public Response deletarLivro(@QueryParam("livroId") Integer livroId) {
+    @Operation(summary = "Deletar livro", description = "Remove um livro do sistema")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "204", description = "Livro deletado com sucesso"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response deletarLivro(
+            @Parameter(description = "ID do livro a ser deletado", required = true) @QueryParam("livroId") Integer livroId) {
         try {
             LOG.infof("Requisição para deletar livro recebida: ID=%d", livroId);
 
@@ -159,7 +178,15 @@ public class LivroResource {
 
     @PUT
     @Path("/saldo/atualizar")
-    public Livro atualizarSaldoLivro(@QueryParam("livroId") Integer livroId, @QueryParam("saldo") Integer saldo) {
+    @Operation(summary = "Atualizar saldo do livro", description = "Atualiza o saldo de páginas restantes de um livro")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Saldo do livro atualizado com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class))),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Livro atualizarSaldoLivro(
+            @Parameter(description = "ID do livro", required = true) @QueryParam("livroId") Integer livroId,
+            @Parameter(description = "Novo saldo de páginas", required = true) @QueryParam("saldo") Integer saldo) {
         try {
             LOG.infof("Requisição para atualizar saldo do livro: ID=%d, Status=%d", livroId, saldo);
 

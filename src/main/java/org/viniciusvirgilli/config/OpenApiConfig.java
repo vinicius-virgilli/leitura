@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.Application;
         description = "API para gerenciamento de leituras e progresso de livros",
         contact = @Contact(
             name = "Vinicius Virgilli",
-            email = "contato@viniciusvirgilli.org"
+            email = "vinicius.virgilli3@gmail.com"
         ),
         license = @License(
             name = "MIT",
@@ -24,8 +24,7 @@ import jakarta.ws.rs.core.Application;
         )
     ),
     servers = {
-        @Server(url = "http://localhost:8080", description = "Servidor de desenvolvimento"),
-        @Server(url = "https://api.leitura.com", description = "Servidor de produção")
+        @Server(url = "http://localhost:8080", description = "Servidor de desenvolvimento")
     },
     tags = {
         @Tag(name = "Livros", description = "Operações relacionadas ao gerenciamento de livros"),

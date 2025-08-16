@@ -8,8 +8,8 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-import org.eclipse.microprofile.openapi.annotations.responses.ApiResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.ApiResponses;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.MetricaCriacaoDto;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
@@ -34,6 +34,13 @@ public class MetricasResource {
     MetricaService metricaService;
 
     @POST
+    @Operation(summary = "Criar uma nova métrica", description = "Cria uma nova métrica de leitura para uma categoria específica")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "201", description = "Métrica criada com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Metrica.class))),
+        @APIResponse(responseCode = "400", description = "Dados inválidos"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public Response criarMetrica(MetricaCriacaoDto metrica) {
         try {
 
@@ -54,6 +61,9 @@ public class MetricasResource {
 
 
     @GET
+    @Operation(summary = "Listar todas as métricas", description = "Retorna uma lista com todas as métricas de leitura cadastradas")
+    @APIResponse(responseCode = "200", description = "Lista de métricas retornada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Metrica.class)))
     public List<Metrica> listarMetricas() {
         LOG.info("Requisição para listar todas as métricas recebida.");
         return metricaService.listarTodos();
@@ -61,7 +71,14 @@ public class MetricasResource {
 
 
     @DELETE
-    public Response deletarMetrica(@QueryParam("categoria") CategoriaLivroEnum categoria) {
+    @Operation(summary = "Deletar métrica por categoria", description = "Remove uma métrica específica baseada na categoria do livro")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Métrica deletada com sucesso"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response deletarMetrica(
+            @Parameter(description = "Categoria do livro para deletar a métrica", required = true)
+            @QueryParam("categoria") CategoriaLivroEnum categoria) {
         try {
             LOG.infof("Requisição para deletar métrica da categoria: %s", categoria);
             metricaService.deletarMetrica(categoria);
