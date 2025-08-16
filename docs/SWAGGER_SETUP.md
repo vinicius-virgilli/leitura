@@ -19,7 +19,7 @@ Foi adicionada a dependência `quarkus-smallrye-openapi` no `pom.xml`:
 quarkus.smallrye-openapi.info-title=Leitura API
 quarkus.smallrye-openapi.info-version=1.0.0
 quarkus.smallrye-openapi.info-description=API para gerenciamento de leituras
-quarkus.smallrye-openapi.info-contact-email=contato@viniciusvirgilli.org
+quarkus.smallrye-openapi.info-contact-email=vinicius.virgilli@gmail.com
 quarkus.smallrye-openapi.info-contact-name=Vinicius Virgilli
 quarkus.smallrye-openapi.info-license-name=MIT
 quarkus.smallrye-openapi.path=/openapi

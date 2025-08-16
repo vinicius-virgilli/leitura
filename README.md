@@ -6,8 +6,13 @@ Este é um projeto pessoal desenvolvido com o objetivo de organizar e acompanhar
 
 - **Java 17**
 - **Quarkus** (framework leve e moderno para aplicações Java)
-- **H2 Database** (persistente em disco)
+- **PostgreSQL** (banco de dados em produção)
+- **PostgreSQL** (banco de dados para desenvolvimento)
+- **H2 Database** (para testes locais)
 - **REST API** com padrão RESTful
+- **OpenAPI/Swagger** (documentação interativa da API)
+- **Docker** (containerização da aplicação)
+- **Maven** (gerenciamento de dependências)
 
 ## 🎯 Objetivo
 
@@ -19,13 +24,24 @@ Gerenciar minha **leitura** com os seguintes dados:
 - Status da leitura (por ler, lendo, lido)
 - Datas de início e término da leitura
 
-## ✅ MVP já implementado
+## ✅ Funcionalidades implementadas
 
-- Cadastro de livros na lista de leitura
-- Listagem completa
-- Banco de dados H2 persistente em disco (`./data/leitura.mv.db`)
-- Lógica para definir ordem de leitura automaticamente
-- Inicialização automática do banco com base nas models
+### Core Features
+- ✅ Cadastro de livros na lista de leitura
+- ✅ Listagem e busca de livros
+- ✅ Atualização de status e progresso de leitura
+- ✅ Exclusão de livros
+- ✅ Cálculo automático de progresso diário
+- ✅ Sistema de métricas de leitura
+
+### Infraestrutura
+- ✅ API REST completa e documentada
+- ✅ Documentação interativa com Swagger/OpenAPI
+- ✅ Containerização com Docker
+- ✅ Banco PostgreSQL para produção
+- ✅ Banco H2 para desenvolvimento local
+- ✅ Agendamento automático de tarefas
+- ✅ Health checks e monitoramento
 
 ## 🧠 Em andamento
 
@@ -36,24 +52,49 @@ Gerenciar minha **leitura** com os seguintes dados:
 - Interface frontend (futuramente em React ou Vue)
 - Deploy gratuito na nuvem (pesquisa em andamento)
 
-## 🔧 Como rodar o projeto localmente
+## 🔧 Como rodar o projeto
 
+### Desenvolvimento Local
 
 ```bash
-1. Clone este repositório:
+# 1. Clone este repositório
 git clone https://github.com/seu-usuario/leitura.git
 
-2. Acesse a pasta:
+# 2. Acesse a pasta
 cd leitura
 
-3. Execute a aplicação (modo dev):
+# 3. Execute a aplicação (modo dev)
 ./mvnw quarkus:dev
 
-4. Acesse a API local em:
+# 4. Acesse a API local em:
 http://localhost:8080
-
-Obs: O banco H2 salva os dados em disco, então ao reiniciar, os dados são mantidos.
 ```
+
+### Docker
+
+Para executar com Docker (banco PostgreSQL + aplicação):
+
+```bash
+# Subir ambiente completo
+docker-compose up -d
+
+# Acessar aplicação
+http://localhost:8080
+```
+
+## 📖 Documentação
+
+- **[🐳 Docker Setup](docs/DOCKER_README.md)** - Guia completo para execução com Docker
+- **[📋 Swagger/OpenAPI](docs/SWAGGER_SETUP.md)** - Configuração e uso da documentação da API
+
+## 🌐 URLs Importantes
+
+Após executar a aplicação:
+
+- **API Base:** http://localhost:8080
+- **Swagger UI:** http://localhost:8080/swagger-ui
+- **OpenAPI Spec:** http://localhost:8080/openapi
+- **Health Check:** http://localhost:8080/q/health
 
 🤝 Contribuições
 Pull Requests são bem-vindos!
