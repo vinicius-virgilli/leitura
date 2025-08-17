@@ -52,6 +52,53 @@ Gerenciar minha **leitura** com os seguintes dados:
 - Interface frontend (futuramente em React ou Vue)
 - Deploy gratuito na nuvem (pesquisa em andamento)
 
+## 🔒 Segurança
+
+### Autenticação e Criptografia de Senhas
+
+O sistema implementa as seguintes medidas de segurança:
+
+- **Criptografia BCrypt**: Todas as senhas são criptografadas usando BCrypt com salt automático
+- **DTOs de Resposta**: As senhas nunca são expostas nas respostas da API
+- **Validação de Credenciais**: Sistema de autenticação seguro com verificação de senha criptografada
+- **Endpoint de Login**: `/usuarios/login` para autenticação de usuários
+
+### Endpoints de Segurança
+
+```bash
+# Login de usuário
+POST /usuarios/login
+Content-Type: application/json
+
+{
+  "email": "usuario@exemplo.com",
+  "senha": "minhasenha123"
+}
+```
+
+**Resposta de sucesso (200):**
+```json
+{
+  "id": 1,
+  "email": "usuario@exemplo.com",
+  "nome": "Nome do Usuário",
+  "dataCriacao": "2025-01-17T10:42:48.636799",
+  "dataAtualizacao": "2025-01-17T10:42:48.636799",
+  "ativo": true
+}
+```
+
+**Resposta de erro (401):**
+```
+Credenciais inválidas
+```
+
+### Dependências de Segurança
+
+- `quarkus-elytron-security-common` - Para criptografia BCrypt nativa do Quarkus
+- Validação de entrada com Bean Validation
+- DTOs separados para requisições e respostas
+
 ## 🔧 Como rodar o projeto
 
 ### Desenvolvimento Local

@@ -1,6 +1,7 @@
 package org.viniciusvirgilli.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.viniciusvirgilli.dto.UsuarioAtualizacaoDto;
 import org.viniciusvirgilli.dto.UsuarioCriacaoDto;
@@ -11,6 +12,9 @@ import java.util.List;
 @ApplicationScoped
 public class UsuarioService {
 
+    @Inject
+    PasswordService passwordService;
+
     @Transactional
     public Usuario criarUsuario(UsuarioCriacaoDto dto) {
         if (usuarioJaExiste(dto.getEmail())) {
@@ -20,7 +24,7 @@ public class UsuarioService {
         Usuario usuario = new Usuario();
         usuario.setEmail(dto.getEmail());
         usuario.setNome(dto.getNome());
-        usuario.setSenha(dto.getSenha());
+        usuario.setSenha(passwordService.encryptPassword(dto.getSenha()));
         usuario.setAtivo(true);
 
         usuario.persist();
@@ -47,6 +51,30 @@ public class UsuarioService {
         return Usuario.find("email", email).firstResult();
     }
 
+    /**
+     * Autentica um usuário verificando email e senha.
+     * 
+     * @param email email do usuário
+     * @param senha senha em texto plano
+     * @return usuário autenticado ou null se credenciais inválidas
+     */
+    public Usuario autenticar(String email, String senha) {
+        if (email == null || senha == null) {
+            return null;
+        }
+        
+        Usuario usuario = buscarPorEmail(email.trim().toLowerCase());
+        if (usuario == null || !usuario.getAtivo()) {
+            return null;
+        }
+        
+        if (passwordService.matches(senha, usuario.getSenha())) {
+            return usuario;
+        }
+        
+        return null;
+    }
+
     @Transactional
     public Usuario atualizarUsuario(Long usuarioId, UsuarioAtualizacaoDto dto) {
         Usuario usuario = Usuario.findById(usuarioId);
@@ -60,7 +88,7 @@ public class UsuarioService {
         }
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
-            usuario.setSenha(dto.getSenha());
+            usuario.setSenha(passwordService.encryptPassword(dto.getSenha()));
         }
 
         if (dto.getAtivo() != null) {

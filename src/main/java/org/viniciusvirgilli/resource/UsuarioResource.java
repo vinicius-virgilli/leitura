@@ -14,6 +14,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.viniciusvirgilli.dto.UsuarioAtualizacaoDto;
 import org.viniciusvirgilli.dto.UsuarioCriacaoDto;
+import org.viniciusvirgilli.dto.UsuarioResponseDto;
+import org.viniciusvirgilli.dto.LoginDto;
 import org.viniciusvirgilli.model.Usuario;
 import org.viniciusvirgilli.service.UsuarioService;
 import org.viniciusvirgilli.service.ValidaUsuarioService;
@@ -38,7 +40,7 @@ public class UsuarioResource {
     @Operation(summary = "Criar usuário", description = "Cria um novo usuário no sistema")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Usuário criado com sucesso",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
         @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
         @APIResponse(responseCode = "409", description = "Usuário com este email já existe"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
@@ -52,7 +54,7 @@ public class UsuarioResource {
 
             LOG.infof("Usuário criado com sucesso: ID=%d, Email=%s", usuario.id, usuario.getEmail());
 
-            return Response.status(Response.Status.CREATED).entity(usuario).build();
+            return Response.status(Response.Status.CREATED).entity(UsuarioResponseDto.fromEntity(usuario)).build();
         } catch (IllegalArgumentException e) {
             LOG.warnf("Erro de validação ao criar usuário: %s", e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -66,16 +68,21 @@ public class UsuarioResource {
     @GET
     @Operation(summary = "Listar usuários", description = "Retorna uma lista com todos os usuários cadastrados")
     @APIResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class)))
-    public List<Usuario> listarUsuarios(
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class)))
+    public List<UsuarioResponseDto> listarUsuarios(
             @Parameter(description = "Filtrar apenas usuários ativos") @QueryParam("ativos") @DefaultValue("false") boolean apenasAtivos) {
         try {
             LOG.info("Requisição para listar usuários recebida");
 
+            List<Usuario> usuarios;
             if (apenasAtivos) {
-                return usuarioService.listarAtivos();
+                usuarios = usuarioService.listarAtivos();
+            } else {
+                usuarios = usuarioService.listarTodos();
             }
-            return usuarioService.listarTodos();
+            return usuarios.stream()
+                .map(UsuarioResponseDto::fromEntity)
+                .toList();
         } catch (Exception e) {
             LOG.error("Erro ao listar usuários", e);
             throw new InternalServerErrorException("Erro interno ao listar usuários");
@@ -87,7 +94,7 @@ public class UsuarioResource {
     @Operation(summary = "Buscar usuário por ID", description = "Retorna um usuário específico pelo seu ID")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário encontrado",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
         @APIResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     public Response buscarUsuarioPorId(
@@ -101,7 +108,7 @@ public class UsuarioResource {
                         .entity("Usuário não encontrado").build();
             }
 
-            return Response.ok(usuario).build();
+            return Response.ok(UsuarioResponseDto.fromEntity(usuario)).build();
         } catch (Exception e) {
             LOG.error("Erro ao buscar usuário por ID", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -114,7 +121,7 @@ public class UsuarioResource {
     @Operation(summary = "Buscar usuário por email", description = "Retorna um usuário específico pelo seu email")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário encontrado",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
         @APIResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     public Response buscarUsuarioPorEmail(
@@ -128,7 +135,7 @@ public class UsuarioResource {
                         .entity("Usuário não encontrado").build();
             }
 
-            return Response.ok(usuario).build();
+            return Response.ok(UsuarioResponseDto.fromEntity(usuario)).build();
         } catch (Exception e) {
             LOG.error("Erro ao buscar usuário por email", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -141,7 +148,7 @@ public class UsuarioResource {
     @Operation(summary = "Atualizar usuário", description = "Atualiza os dados de um usuário específico")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário atualizado com sucesso",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
         @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
         @APIResponse(responseCode = "404", description = "Usuário não encontrado"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
@@ -157,7 +164,7 @@ public class UsuarioResource {
 
             LOG.infof("Usuário atualizado com sucesso: ID=%d", id);
 
-            return Response.ok(usuario).build();
+            return Response.ok(UsuarioResponseDto.fromEntity(usuario)).build();
         } catch (IllegalArgumentException e) {
             LOG.warnf("Erro de validação ao atualizar usuário: %s", e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -201,7 +208,7 @@ public class UsuarioResource {
     @Operation(summary = "Desativar usuário", description = "Desativa um usuário sem removê-lo do sistema")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário desativado com sucesso",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
         @APIResponse(responseCode = "404", description = "Usuário não encontrado"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
     })
@@ -214,7 +221,7 @@ public class UsuarioResource {
 
             LOG.infof("Usuário desativado com sucesso: ID=%d", id);
 
-            return Response.ok(usuario).build();
+            return Response.ok(UsuarioResponseDto.fromEntity(usuario)).build();
         } catch (IllegalArgumentException e) {
             LOG.warnf("Erro ao desativar usuário: %s", e.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
@@ -230,7 +237,7 @@ public class UsuarioResource {
     @Operation(summary = "Ativar usuário", description = "Ativa um usuário previamente desativado")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário ativado com sucesso",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
         @APIResponse(responseCode = "404", description = "Usuário não encontrado"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
     })
@@ -251,6 +258,43 @@ public class UsuarioResource {
             LOG.error("Erro interno ao ativar usuário", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Erro interno ao ativar usuário").build();
+        }
+    }
+
+    @POST
+    @Path("/login")
+    @Operation(summary = "Autenticar usuário", description = "Autentica um usuário com email e senha")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Usuário autenticado com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
+        @APIResponse(responseCode = "401", description = "Credenciais inválidas"),
+        @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response login(LoginDto loginDto) {
+        try {
+            LOG.infof("Tentativa de login para: %s", loginDto.getEmail());
+
+            if (loginDto.getEmail() == null || loginDto.getSenha() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Email e senha são obrigatórios").build();
+            }
+
+            Usuario usuario = usuarioService.autenticar(loginDto.getEmail(), loginDto.getSenha());
+            
+            if (usuario == null) {
+                LOG.warnf("Falha na autenticação para: %s", loginDto.getEmail());
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("Credenciais inválidas").build();
+            }
+
+            LOG.infof("Login realizado com sucesso para: %s", loginDto.getEmail());
+            return Response.ok(UsuarioResponseDto.fromEntity(usuario)).build();
+            
+        } catch (Exception e) {
+            LOG.error("Erro interno durante autenticação", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erro interno durante autenticação").build();
         }
     }
 }
