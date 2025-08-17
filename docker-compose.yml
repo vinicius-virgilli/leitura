@@ -1,26 +1,50 @@
 
+# =============================================================================
+# DOCKER COMPOSE - CONFIGURAÇÃO UNIFICADA
+# =============================================================================
+# Para desenvolvimento local: docker-compose up -d
+# Para produção: Configure via Fly.io (recursos gerenciados pelo site)
+
 services:
   db:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: leitura
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-leitura}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - leitura_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   app:
     build: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: on-failure
     ports:
       - "8080:8080"
+    networks:
+      - leitura_network
     environment:
-      - QUARKUS_DATASOURCE_USERNAME=postgres
-      - QUARKUS_DATASOURCE_PASSWORD=postgres
-      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db:5432/leitura
-    command: ["java", "-jar", "app.jar"]
+      # Variáveis de ambiente (podem ser sobrescritas via .env ou variáveis do sistema)
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_URL=${DB_URL:-jdbc:postgresql://db:5432/leitura}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:8080}
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:8080}
+    # O Dockerfile já está configurado com perfil prod e otimizações JVM
+    # Para desenvolvimento local, você pode criar um .env com QUARKUS_PROFILE=dev
+
+networks:
+  leitura_network:
+    driver: bridge

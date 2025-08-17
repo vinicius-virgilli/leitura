@@ -1,23 +1,68 @@
+# =============================================================================
+# FLY.IO CONFIGURATION - PRODUÇÃO
+# =============================================================================
 # fly.toml app configuration file generated for leitura on 2025-08-02T15:56:14Z
-#
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
+# 
+# RECURSOS (CPU/RAM): Configure via site do Fly.io em vez de neste arquivo
 
 app = 'leitura'
 primary_region = 'mia'
 
 [build]
 
+[env]
+  # O perfil prod já está configurado no Dockerfile
+  # Variáveis de ambiente específicas devem ser definidas via fly secrets
+  JAVA_OPTS = "-Dquarkus.profile=prod"
+
 [http_service]
   internal_port = 8080
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ['app']
+  
+  # Health checks para produção
+  [http_service.checks]
+    [http_service.checks.health]
+      grace_period = "30s"
+      interval = "30s"
+      method = "GET"
+      path = "/health/ready"
+      timeout = "10s"
+      
+    [http_service.checks.liveness]
+      grace_period = "30s"
+      interval = "60s"
+      method = "GET"
+      path = "/health/live"
+      timeout = "10s"
 
-[[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
-  memory_mb = 1024
+# =============================================================================
+# CONFIGURAÇÃO DE RECURSOS
+# =============================================================================
+# Configure CPU e RAM via site do Fly.io:
+# 1. Acesse: https://fly.io/apps/leitura
+# 2. Vá em "Scale" ou "Machines"
+# 3. Ajuste CPU e memória conforme necessário
+# 
+# Recomendações:
+# - CPU: 1-2 cores compartilhadas para início
+# - RAM: 1-2GB para início
+# - Monitore métricas e ajuste conforme uso
+
+# =============================================================================
+# COMANDOS PARA CONFIGURAR SECRETS NO FLY.IO
+# =============================================================================
+# Execute estes comandos para definir as variáveis de ambiente sensíveis:
+#
+# fly secrets set DB_USER="seu_usuario_db"
+# fly secrets set DB_PASSWORD="sua_senha_super_segura"
+# fly secrets set DB_URL="sua_url_do_banco"
+# fly secrets set CORS_ORIGINS="https://leitura.app.com,https://www.leitura.app.com"
+# fly secrets set API_BASE_URL="https://leitura.fly.dev"
+#
+# Para listar secrets: fly secrets list
+# Para remover secret: fly secrets unset NOME_DA_VARIAVEL

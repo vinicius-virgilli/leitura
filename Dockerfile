@@ -16,4 +16,14 @@ RUN apk add --no-cache tzdata \
 WORKDIR /app
 COPY --from=build /app/target/*-runner.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Configurações de JVM otimizadas para produção + perfil prod
+ENTRYPOINT ["java", \
+    "-Dquarkus.profile=prod", \
+    "-Xms512m", \
+    "-Xmx2g", \
+    "-XX:+UseG1GC", \
+    "-XX:MaxGCPauseMillis=200", \
+    "-XX:+UseStringDeduplication", \
+    "-Duser.timezone=America/Sao_Paulo", \
+    "-jar", "app.jar"]
