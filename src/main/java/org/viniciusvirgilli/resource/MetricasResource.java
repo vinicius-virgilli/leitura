@@ -1,5 +1,6 @@
 package org.viniciusvirgilli.resource;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -10,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.MetricaCriacaoDto;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
@@ -34,6 +36,8 @@ public class MetricasResource {
     MetricaService metricaService;
 
     @POST
+    @RolesAllowed({"ADMIN", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Criar uma nova métrica", description = "Cria uma nova métrica de leitura para uma categoria específica")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Métrica criada com sucesso",
@@ -61,6 +65,8 @@ public class MetricasResource {
 
 
     @GET
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Listar todas as métricas", description = "Retorna uma lista com todas as métricas de leitura cadastradas")
     @APIResponse(responseCode = "200", description = "Lista de métricas retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Metrica.class)))
@@ -71,6 +77,8 @@ public class MetricasResource {
 
 
     @DELETE
+    @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Deletar métrica por categoria", description = "Remove uma métrica específica baseada na categoria do livro")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Métrica deletada com sucesso"),

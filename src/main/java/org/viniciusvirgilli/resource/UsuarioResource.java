@@ -1,5 +1,7 @@
 package org.viniciusvirgilli.resource;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -11,6 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
 import org.viniciusvirgilli.dto.UsuarioAtualizacaoDto;
 import org.viniciusvirgilli.dto.UsuarioCriacaoDto;
@@ -36,7 +39,11 @@ public class UsuarioResource {
     @Inject
     ValidaUsuarioService validaUsuarioService;
 
+    @Inject
+    org.viniciusvirgilli.service.JwtService jwtService;
+
     @POST
+    @PermitAll
     @Operation(summary = "Criar usuário", description = "Cria um novo usuário no sistema")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Usuário criado com sucesso",
@@ -66,6 +73,8 @@ public class UsuarioResource {
     }
 
     @GET
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Listar usuários", description = "Retorna uma lista com todos os usuários cadastrados")
     @APIResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class)))
@@ -91,6 +100,7 @@ public class UsuarioResource {
 
     @GET
     @Path("/{id}")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
     @Operation(summary = "Buscar usuário por ID", description = "Retorna um usuário específico pelo seu ID")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário encontrado",
@@ -118,6 +128,8 @@ public class UsuarioResource {
 
     @GET
     @Path("/email/{email}")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Buscar usuário por email", description = "Retorna um usuário específico pelo seu email")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário encontrado",
@@ -145,6 +157,8 @@ public class UsuarioResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Atualizar usuário", description = "Atualiza os dados de um usuário específico")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário atualizado com sucesso",
@@ -177,6 +191,8 @@ public class UsuarioResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed({"ADMIN"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Deletar usuário", description = "Remove um usuário do sistema")
     @APIResponses(value = {
         @APIResponse(responseCode = "204", description = "Usuário deletado com sucesso"),
@@ -205,6 +221,8 @@ public class UsuarioResource {
 
     @PUT
     @Path("/{id}/desativar")
+    @RolesAllowed({"ADMIN", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Desativar usuário", description = "Desativa um usuário sem removê-lo do sistema")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário desativado com sucesso",
@@ -234,6 +252,8 @@ public class UsuarioResource {
 
     @PUT
     @Path("/{id}/ativar")
+    @RolesAllowed({"ADMIN", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Ativar usuário", description = "Ativa um usuário previamente desativado")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Usuário ativado com sucesso",
@@ -263,36 +283,54 @@ public class UsuarioResource {
 
     @POST
     @Path("/login")
-    @Operation(summary = "Autenticar usuário", description = "Autentica um usuário com email e senha")
+    @PermitAll
+    @Operation(summary = "Autenticar usuário", description = "Autentica um usuário e retorna um token JWT")
     @APIResponses(value = {
-        @APIResponse(responseCode = "200", description = "Usuário autenticado com sucesso",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class))),
+        @APIResponse(responseCode = "200", description = "Autenticação realizada com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = org.viniciusvirgilli.dto.LoginResponseDto.class))),
         @APIResponse(responseCode = "401", description = "Credenciais inválidas"),
-        @APIResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     public Response login(LoginDto loginDto) {
         try {
-            LOG.infof("Tentativa de login para: %s", loginDto.getEmail());
-
+            LOG.infof("[LOGIN] Iniciando processo de autenticação");
+            LOG.infof("[LOGIN] Email recebido: %s", loginDto != null ? loginDto.getEmail() : "null");
+            
+            if (loginDto == null) {
+                LOG.error("[LOGIN] LoginDto é null");
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Dados de login não fornecidos").build();
+            }
+            
             if (loginDto.getEmail() == null || loginDto.getSenha() == null) {
+                LOG.error("[LOGIN] Email ou senha são null");
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity("Email e senha são obrigatórios").build();
             }
 
+            LOG.infof("[LOGIN] Chamando usuarioService.autenticar para email: %s", loginDto.getEmail());
             Usuario usuario = usuarioService.autenticar(loginDto.getEmail(), loginDto.getSenha());
             
             if (usuario == null) {
-                LOG.warnf("Falha na autenticação para: %s", loginDto.getEmail());
+                LOG.warnf("[LOGIN] Falha na autenticação para o email: %s", loginDto.getEmail());
                 return Response.status(Response.Status.UNAUTHORIZED)
                         .entity("Credenciais inválidas").build();
             }
+            
+            LOG.infof("[LOGIN] Usuário autenticado com sucesso: %s, Perfil: %s", usuario.getEmail(), usuario.getPerfil());
+            LOG.infof("[LOGIN] Chamando jwtService.generateToken");
 
-            LOG.infof("Login realizado com sucesso para: %s", loginDto.getEmail());
-            return Response.ok(UsuarioResponseDto.fromEntity(usuario)).build();
+            // Gerar token JWT
+            String token = jwtService.gerarToken(usuario);
+            LOG.infof("[LOGIN] Token JWT gerado com sucesso");
+            
+            LOG.infof("[LOGIN] Login realizado com sucesso para o usuário: %s", loginDto.getEmail());
+            return Response.ok(org.viniciusvirgilli.dto.LoginResponseDto.fromEntity(usuario, token)).build();
             
         } catch (Exception e) {
-            LOG.error("Erro interno durante autenticação", e);
+            LOG.error("[LOGIN] Erro interno durante autenticação", e);
+            LOG.error("[LOGIN] Tipo da exceção: " + e.getClass().getSimpleName());
+            LOG.error("[LOGIN] Mensagem da exceção: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Erro interno durante autenticação").build();
         }

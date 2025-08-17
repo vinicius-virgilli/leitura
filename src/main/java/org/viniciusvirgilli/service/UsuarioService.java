@@ -3,6 +3,7 @@ package org.viniciusvirgilli.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.jboss.logging.Logger;
 import org.viniciusvirgilli.dto.UsuarioAtualizacaoDto;
 import org.viniciusvirgilli.dto.UsuarioCriacaoDto;
 import org.viniciusvirgilli.model.Usuario;
@@ -12,23 +13,39 @@ import java.util.List;
 @ApplicationScoped
 public class UsuarioService {
 
+    private static final Logger LOG = Logger.getLogger(UsuarioService.class);
+
     @Inject
     PasswordService passwordService;
 
     @Transactional
     public Usuario criarUsuario(UsuarioCriacaoDto dto) {
-        if (usuarioJaExiste(dto.getEmail())) {
-            throw new IllegalArgumentException("Usuário com este email já existe.");
+        LOG.info("[CRIAR_USUARIO] Iniciando criação de usuário com email: " + dto.getEmail());
+        
+        try {
+            // Temporariamente comentado para debug
+            // if (usuarioJaExiste(dto.getEmail())) {
+            //     throw new IllegalArgumentException("Usuário com este email já existe.");
+            // }
+
+            LOG.info("[CRIAR_USUARIO] Criando objeto Usuario");
+            Usuario usuario = new Usuario();
+            usuario.setEmail(dto.getEmail());
+            usuario.setNome(dto.getNome());
+            
+            LOG.info("[CRIAR_USUARIO] Criptografando senha");
+            usuario.setSenha(passwordService.encryptPassword(dto.getSenha()));
+            usuario.setAtivo(true);
+            usuario.setPerfil(org.viniciusvirgilli.enums.Perfil.USER);
+
+            LOG.info("[CRIAR_USUARIO] Persistindo usuário no banco");
+            usuario.persist();
+            LOG.info("[CRIAR_USUARIO] Usuário criado com sucesso");
+            return usuario;
+        } catch (Exception e) {
+            LOG.error("[CRIAR_USUARIO] Erro ao criar usuário: " + e.getMessage(), e);
+            throw e;
         }
-
-        Usuario usuario = new Usuario();
-        usuario.setEmail(dto.getEmail());
-        usuario.setNome(dto.getNome());
-        usuario.setSenha(passwordService.encryptPassword(dto.getSenha()));
-        usuario.setAtivo(true);
-
-        usuario.persist();
-        return usuario;
     }
 
     private boolean usuarioJaExiste(String email) {
@@ -47,8 +64,39 @@ public class UsuarioService {
         return Usuario.findById(usuarioId);
     }
 
+    /**
+     * Busca um usuário pelo email.
+     * 
+     * @param email email do usuário
+     * @return usuário encontrado ou null
+     */
     public Usuario buscarPorEmail(String email) {
-        return Usuario.find("email", email).firstResult();
+        LOG.infof("[BUSCA] Iniciando busca por email");
+        LOG.infof("[BUSCA] Email recebido: %s", email);
+        
+        if (email == null || email.trim().isEmpty()) {
+            LOG.warnf("[BUSCA] Email é null ou vazio");
+            return null;
+        }
+        
+        String emailProcessado = email.trim().toLowerCase();
+        LOG.infof("[BUSCA] Email processado: %s", emailProcessado);
+        LOG.infof("[BUSCA] Executando query no banco de dados");
+        
+        try {
+            Usuario usuario = Usuario.find("email = ?1", emailProcessado).firstResult();
+            
+            if (usuario != null) {
+                LOG.infof("[BUSCA] Usuário encontrado: ID=%d, Email=%s", usuario.id, usuario.getEmail());
+            } else {
+                LOG.warnf("[BUSCA] Nenhum usuário encontrado para email: %s", emailProcessado);
+            }
+            
+            return usuario;
+        } catch (Exception e) {
+            LOG.errorf(e, "[BUSCA] Erro ao buscar usuário por email: %s", emailProcessado);
+            throw e;
+        }
     }
 
     /**
@@ -59,17 +107,41 @@ public class UsuarioService {
      * @return usuário autenticado ou null se credenciais inválidas
      */
     public Usuario autenticar(String email, String senha) {
+        LOG.infof("[AUTH] Iniciando autenticação");
+        LOG.infof("[AUTH] Email recebido: %s", email);
+        LOG.infof("[AUTH] Senha recebida: %s", senha != null ? "[PRESENTE]" : "null");
+        
         if (email == null || senha == null) {
+            LOG.error("[AUTH] Email ou senha são null");
             return null;
         }
         
-        Usuario usuario = buscarPorEmail(email.trim().toLowerCase());
-        if (usuario == null || !usuario.getAtivo()) {
+        String emailProcessado = email.trim().toLowerCase();
+        LOG.infof("[AUTH] Email processado: %s", emailProcessado);
+        LOG.infof("[AUTH] Buscando usuário por email");
+        
+        Usuario usuario = buscarPorEmail(emailProcessado);
+        
+        if (usuario == null) {
+            LOG.warnf("[AUTH] Usuário não encontrado para email: %s", emailProcessado);
             return null;
         }
+        
+        LOG.infof("[AUTH] Usuário encontrado: ID=%d, Email=%s, Ativo=%s", usuario.id, usuario.getEmail(), usuario.getAtivo());
+        
+        if (!usuario.getAtivo()) {
+            LOG.warnf("[AUTH] Usuário inativo: %s", emailProcessado);
+            return null;
+        }
+        
+        LOG.infof("[AUTH] Verificando senha");
+        LOG.infof("[AUTH] Senha hash armazenada: %s", usuario.getSenha() != null ? "[PRESENTE]" : "null");
         
         if (passwordService.matches(senha, usuario.getSenha())) {
+            LOG.infof("[AUTH] Senha válida - autenticação bem-sucedida");
             return usuario;
+        } else {
+            LOG.warnf("[AUTH] Senha inválida para usuário: %s", emailProcessado);
         }
         
         return null;

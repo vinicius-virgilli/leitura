@@ -1,5 +1,6 @@
 package org.viniciusvirgilli.resource;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -10,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.LivroCriacaoDto;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
@@ -40,6 +42,8 @@ public class LivroResource {
 
     @POST
     @Path("/usuario/{usuarioId}")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Criar um novo livro", description = "Cria um novo livro no sistema para um usuário específico")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Livro criado com sucesso",
@@ -68,6 +72,8 @@ public class LivroResource {
     }
 
     @GET
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Listar todos os livros", description = "Retorna uma lista com todos os livros cadastrados")
     @APIResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class)))
@@ -79,6 +85,8 @@ public class LivroResource {
 
     @GET
     @Path("/usuario/{usuarioId}")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Listar livros por usuário", description = "Retorna uma lista com todos os livros de um usuário específico")
     @APIResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class)))
@@ -91,6 +99,8 @@ public class LivroResource {
 
     @GET
     @Path("/{livroId}")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Buscar livro por ID", description = "Retorna um livro específico pelo seu ID")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Livro encontrado",
@@ -111,6 +121,8 @@ public class LivroResource {
 
     @PUT
     @Path("/status/atualizar")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Atualizar status do livro", description = "Atualiza o status de leitura de um livro específico")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Status do livro atualizado com sucesso",
@@ -135,6 +147,8 @@ public class LivroResource {
 
     @POST
     @Path("/progresso/atualizar")
+    @RolesAllowed({"ADMIN", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Atualizar progresso manualmente", description = "Executa manualmente a atualização do progresso de leitura de todos os livros")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Progresso atualizado com sucesso"),
@@ -169,6 +183,8 @@ public class LivroResource {
     }
 
     @DELETE
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Deletar livro", description = "Remove um livro do sistema")
     @APIResponses(value = {
         @APIResponse(responseCode = "204", description = "Livro deletado com sucesso"),
@@ -193,6 +209,8 @@ public class LivroResource {
 
     @PUT
     @Path("/saldo/atualizar")
+    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
     @Operation(summary = "Atualizar saldo do livro", description = "Atualiza o saldo de páginas restantes de um livro")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Saldo do livro atualizado com sucesso",
