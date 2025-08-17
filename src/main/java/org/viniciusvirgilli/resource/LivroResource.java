@@ -39,19 +39,22 @@ public class LivroResource {
     AtualizaProgressoLeituraService atualizaProgressoLeituraService;
 
     @POST
-    @Operation(summary = "Criar um novo livro", description = "Cria um novo livro no sistema")
+    @Path("/usuario/{usuarioId}")
+    @Operation(summary = "Criar um novo livro", description = "Cria um novo livro no sistema para um usuário específico")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Livro criado com sucesso",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class))),
         @APIResponse(responseCode = "400", description = "Dados inválidos"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
     })
-    public Response criarLivro(LivroCriacaoDto livro) {
+    public Response criarLivro(
+            @Parameter(description = "ID do usuário", required = true) @PathParam("usuarioId") Long usuarioId,
+            LivroCriacaoDto livro) {
         try {
-            LOG.infof("Requisição para criar livro recebida: %s", livro.getNome());
+            LOG.infof("Requisição para criar livro recebida: %s para usuário %d", livro.getNome(), usuarioId);
 
             validaLivroService.validarCriacao(livro);
-            Livro criado = livroService.criarLivro(livro);
+            Livro criado = livroService.criarLivro(livro, usuarioId);
             LOG.infof("Livro criado com sucesso: ID=%d, Nome=%s", criado.id, criado.getNome());
 
             atualizarProgressoAposCriarAtualizarLivro();
@@ -71,7 +74,19 @@ public class LivroResource {
     public List<Livro> listarLivros() {
         LOG.info("Requisição para listar todos os livros");
 
-        return livroService.listarTodos();
+        return livroService.listarLivros();
+    }
+
+    @GET
+    @Path("/usuario/{usuarioId}")
+    @Operation(summary = "Listar livros por usuário", description = "Retorna uma lista com todos os livros de um usuário específico")
+    @APIResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class)))
+    public List<Livro> listarLivrosPorUsuario(
+            @Parameter(description = "ID do usuário", required = true) @PathParam("usuarioId") Long usuarioId) {
+        LOG.infof("Requisição para listar livros do usuário %d", usuarioId);
+
+        return livroService.listarPorUsuario(usuarioId);
     }
 
     @GET

@@ -37,12 +37,54 @@ public class AtualizaProgressoLeituraService {
         }
     }
 
+    @Transactional
+    public void atualizarProgressoDosLivrosPorUsuario(Long usuarioId) {
+        List<Metrica> metricas = metricaService.listarPorUsuario(usuarioId);
+
+        if (metricas.isEmpty()) return;
+
+        for (Metrica metrica : metricas) {
+            processarLivrosDaCategoriaEUsuario(metrica, usuarioId);
+        }
+    }
+
     private void processarLivrosDaCategoria(Metrica metrica) {
         if (metrica.getPaginasPorDia() == null || metrica.getDataBase() == null) return;
 
         List<DayOfWeek> diasDaSemanaLeitura = metrica.getDiasSemanaLeitura();
 
         List<Livro> livros = livroService.buscarPorCategoria(metrica.getCategoria());
+        livros.sort(Comparator.comparing(Livro::getOrdemDeLeitura));
+
+        int totalPaginasLidas = 0;
+        int totalLivrosLidos = 0;
+
+        for (int i = 0; i < livros.size(); i++) {
+            Livro livro = livros.get(i);
+
+            LocalDate dataInicio = livroProgressoCalculator.calcularDataInicioLeitura(i == 0 ? null : livros.get(i - 1), metrica.getDataBase(), diasDaSemanaLeitura);
+            LocalDate dataTermino = livroProgressoCalculator.calcularDataTerminoLeitura(livro, metrica.getPaginasPorDia(), dataInicio, diasDaSemanaLeitura);
+            int paginaAtual = livroProgressoCalculator.calcularPaginaAtual(livro.getSaldoPaginas(), metrica.getPaginasPorDia(), dataInicio, diasDaSemanaLeitura);
+
+            atualizarLivroComProgresso(livro, dataInicio, dataTermino, paginaAtual, diasDaSemanaLeitura);
+
+            int vezesLido = livro.getQuantidadeVezesLido() != null ? livro.getQuantidadeVezesLido() : 0;
+            int totalPaginasLivro = livro.getTotalPaginas() != null ? livro.getTotalPaginas() : 0;
+
+            totalPaginasLidas += vezesLido * totalPaginasLivro;
+            totalLivrosLidos += vezesLido;
+        }
+
+        metrica.setTotalPaginasLidas(totalPaginasLidas);
+        metrica.setTotalLivrosLidos(totalLivrosLidos);
+    }
+
+    private void processarLivrosDaCategoriaEUsuario(Metrica metrica, Long usuarioId) {
+        if (metrica.getPaginasPorDia() == null || metrica.getDataBase() == null) return;
+
+        List<DayOfWeek> diasDaSemanaLeitura = metrica.getDiasSemanaLeitura();
+
+        List<Livro> livros = livroService.buscarPorCategoriaEUsuario(metrica.getCategoria(), usuarioId);
         livros.sort(Comparator.comparing(Livro::getOrdemDeLeitura));
 
         int totalPaginasLidas = 0;

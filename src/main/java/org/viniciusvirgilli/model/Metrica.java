@@ -19,6 +19,10 @@ public class Metrica extends PanacheEntity {
     @Enumerated(EnumType.STRING)
     private CategoriaLivroEnum categoria;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private Integer paginasPorDia;
     private Integer totalPaginasLidas;
     private Integer totalLivrosLidos;

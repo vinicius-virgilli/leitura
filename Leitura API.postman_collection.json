@@ -1,0 +1,584 @@
+{
+	"info": {
+		"_postman_id": "968a2369-1026-47e5-8a11-797e1809bc94",
+		"name": "Leitura API",
+		"description": "Collection para testar todos os endpoints da API de Leitura",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "39992751"
+	},
+	"item": [
+		{
+			"name": "Localhost",
+			"item": [
+				{
+					"name": "Usuários",
+					"item": [
+						{
+							"name": "Criar Usuário",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@exemplo.com\",\n  \"senha\": \"senha123\"\n}"
+								},
+								"url": "{{localhost}}/usuarios"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Usuários",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/usuarios"
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar Usuário por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/usuarios/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Usuário",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"João Silva Atualizado\",\n  \"email\": \"joao.atualizado@exemplo.com\"\n}"
+								},
+								"url": "{{localhost}}/usuarios/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar Usuário",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{localhost}}/usuarios/1"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Livros",
+					"item": [
+						{
+							"name": "Criar Livro",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"O Poder do Hábito\",\n  \"categoria\": \"INTELECTUAL\",\n  \"totalPaginas\": 300\n}"
+								},
+								"url": "{{localhost}}/livros/usuario/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Todos os Livros",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/livros"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Livros por Usuário",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/livros/usuario/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar Livro por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/livros/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Status do Livro",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{localhost}}/livros/status/atualizar?livroId=1&status=LENDO",
+									"host": [
+										"{{localhost}}"
+									],
+									"path": [
+										"livros",
+										"status",
+										"atualizar"
+									],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1"
+										},
+										{
+											"key": "status",
+											"value": "LENDO",
+											"description": "Valores possíveis: A_LER, LENDO, LIDO"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Saldo do Livro",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{localhost}}/livros/saldo/atualizar?livroId=1&saldo=50",
+									"host": [
+										"{{localhost}}"
+									],
+									"path": [
+										"livros",
+										"saldo",
+										"atualizar"
+									],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1"
+										},
+										{
+											"key": "saldo",
+											"value": "50",
+											"description": "Número de páginas a adicionar ao saldo"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar Livro",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{localhost}}/livros?livroId=1",
+									"host": [
+										"{{localhost}}"
+									],
+									"path": [
+										"livros"
+									],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Progresso Manual",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": "{{localhost}}/livros/progresso/atualizar"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Métricas",
+					"item": [
+						{
+							"name": "Listar Métricas por Usuário",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/metricas/usuario/1"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Heathcheck",
+					"item": [
+						{
+							"name": "Health",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health"
+							},
+							"response": []
+						},
+						{
+							"name": "Health/live",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health/live"
+							},
+							"response": []
+						},
+						{
+							"name": "Health/ready",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health/ready"
+							},
+							"response": []
+						},
+						{
+							"name": "Health/metrics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health/metrics"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Produção",
+			"item": [
+				{
+					"name": "Usuários",
+					"item": [
+						{
+							"name": "Criar Usuário",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@exemplo.com\",\n  \"senha\": \"senha123\"\n}"
+								},
+								"url": "{{production}}/usuarios"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Usuários",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/usuarios"
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar Usuário por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/usuarios/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Usuário",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"João Silva Atualizado\",\n  \"email\": \"joao.atualizado@exemplo.com\"\n}"
+								},
+								"url": "{{production}}/usuarios/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar Usuário",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{production}}/usuarios/1"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Livros",
+					"item": [
+						{
+							"name": "Criar Livro",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"O Poder do Hábito\",\n  \"categoria\": \"INTELECTUAL\",\n  \"totalPaginas\": 300\n}"
+								},
+								"url": "{{production}}/livros/usuario/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Todos os Livros",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/livros"
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Livros por Usuário",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/livros/usuario/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar Livro por ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/livros/1"
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Status do Livro",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{production}}/livros/status/atualizar?livroId=1&status=LENDO",
+									"host": [
+										"{{production}}"
+									],
+									"path": [
+										"livros",
+										"status",
+										"atualizar"
+									],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1"
+										},
+										{
+											"key": "status",
+											"value": "LENDO",
+											"description": "Valores possíveis: A_LER, LENDO, LIDO"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Saldo do Livro",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{production}}/livros/saldo/atualizar?livroId=1&saldo=50",
+									"host": [
+										"{{production}}"
+									],
+									"path": [
+										"livros",
+										"saldo",
+										"atualizar"
+									],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1"
+										},
+										{
+											"key": "saldo",
+											"value": "50",
+											"description": "Número de páginas a adicionar ao saldo"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar Livro",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{production}}/livros?livroId=1",
+									"host": [
+										"{{production}}"
+									],
+									"path": [
+										"livros"
+									],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Progresso Manual",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": "{{production}}/livros/progresso/atualizar"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Métricas",
+					"item": [
+						{
+							"name": "Listar Métricas por Usuário",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/metricas/usuario/1"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Heathcheck",
+					"item": [
+						{
+							"name": "Health",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health"
+							},
+							"response": []
+						},
+						{
+							"name": "Health/live",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health/live"
+							},
+							"response": []
+						},
+						{
+							"name": "Health/ready",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health/ready"
+							},
+							"response": []
+						},
+						{
+							"name": "Health/metrics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{localhost}}/health/metrics"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "localhost",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "production",
+			"value": "https://leitura.fly.dev/",
+			"description": "Substitua pela URL real de produção"
+		}
+	]
+}

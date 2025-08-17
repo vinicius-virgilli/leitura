@@ -30,6 +30,10 @@ public class Livro extends PanacheEntity {
     @Enumerated(EnumType.STRING)
     private CategoriaLivroEnum categoria;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private LocalDate inicioLeitura;
     private LocalDate terminoLeitura;
     private Integer saldoPaginas;

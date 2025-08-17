@@ -1,11 +1,13 @@
 package org.viniciusvirgilli.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.viniciusvirgilli.dto.LivroCriacaoDto;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
 import org.viniciusvirgilli.model.Livro;
+import org.viniciusvirgilli.model.Usuario;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,31 +15,39 @@ import java.util.List;
 @ApplicationScoped
 public class LivroService {
 
+    @Inject
+    UsuarioService usuarioService;
+
     @Transactional
-    public Livro criarLivro(LivroCriacaoDto dto) {
-        if (livroJaExiste(dto.getNome())) {
-            throw new IllegalArgumentException("O livro já existe.");
+    public Livro criarLivro(LivroCriacaoDto dto, Long usuarioId) {
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuário não encontrado.");
         }
 
-        List<Livro> livros = Livro.listAll();
+        if (livroJaExiste(dto.getNome(), usuarioId)) {
+            throw new IllegalArgumentException("O livro já existe para este usuário.");
+        }
+
+        List<Livro> livros = listarPorUsuario(usuarioId);
 
         Livro livro;
 
         if (livros.isEmpty()) {
-            livro = criarPrimeiroLivro(dto);
+            livro = criarPrimeiroLivro(dto, usuario);
         } else {
-            livro = criarLivroComListaExistente(dto, livros.size());
+            livro = criarLivroComListaExistente(dto, livros.size(), usuario);
         }
 
         livro.persist();
         return livro;
     }
 
-    private boolean livroJaExiste(String nome) {
-        return Livro.find("nome", nome).firstResult() != null;
+    private boolean livroJaExiste(String nome, Long usuarioId) {
+        return Livro.find("nome = ?1 and usuario.id = ?2", nome, usuarioId).firstResult() != null;
     }
 
-    private Livro criarPrimeiroLivro(LivroCriacaoDto dto) {
+    private Livro criarPrimeiroLivro(LivroCriacaoDto dto, Usuario usuario) {
         Livro livro = new Livro();
 
         livro.setNome(dto.getNome());
@@ -55,11 +65,12 @@ public class LivroService {
         livro.setTerminoLeitura(null);
         livro.setCategoria(dto.getCategoria());
         livro.setQuantidadeVezesLido(dto.getQuantidadeVezesLido() != null? dto.getQuantidadeVezesLido() : 0);
+        livro.setUsuario(usuario);
 
         return livro;
     }
 
-    private Livro criarLivroComListaExistente(LivroCriacaoDto dto, int tamanhoLista) {
+    private Livro criarLivroComListaExistente(LivroCriacaoDto dto, int tamanhoLista, Usuario usuario) {
         Livro livro = new Livro();
 
         livro.setNome(dto.getNome());
@@ -77,24 +88,45 @@ public class LivroService {
         livro.setTerminoLeitura(null);
         livro.setCategoria(dto.getCategoria());
         livro.setQuantidadeVezesLido(dto.getQuantidadeVezesLido() != null? dto.getQuantidadeVezesLido() : 0);
+        livro.setUsuario(usuario);
 
         return livro;
+    }
+
+    public List<Livro> listarLivros() {
+        return Livro.listAll();
     }
 
     public List<Livro> listarTodos() {
         return Livro.listAll();
     }
 
+    public List<Livro> listarPorUsuario(Long usuarioId) {
+        return Livro.find("usuario.id", usuarioId).list();
+    }
+
     public Livro listarLivroPorId(Integer livroId) {
         return Livro.find("id", livroId).firstResult();
+    }
+
+    public Livro buscarPorIdEUsuario(Long id, Long usuarioId) {
+        return Livro.find("id = ?1 and usuario.id = ?2", id, usuarioId).firstResult();
     }
 
     public List<Livro> buscarPorStatus(StatusLeituraEnum status) {
         return Livro.find("status", status).list();
     }
 
+    public List<Livro> buscarPorStatusEUsuario(StatusLeituraEnum status, Long usuarioId) {
+        return Livro.find("status = ?1 and usuario.id = ?2", status, usuarioId).list();
+    }
+
     public List<Livro> buscarPorCategoria(CategoriaLivroEnum categoria) {
         return Livro.find("categoria", categoria).list();
+    }
+
+    public List<Livro> buscarPorCategoriaEUsuario(CategoriaLivroEnum categoria, Long usuarioId) {
+        return Livro.find("categoria = ?1 and usuario.id = ?2", categoria, usuarioId).list();
     }
 
     @Transactional
