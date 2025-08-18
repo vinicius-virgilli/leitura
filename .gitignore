@@ -45,14 +45,5 @@ nb-configuration.xml
 # Certificados locais
 .certs/
 
-# Chaves privadas e certificados sensíveis
-*.pem
-private_key.*
-*.key
-*.p12
-*.pfx
-*.jks
-*.keystore
-
 # Dados do PostgreSQL
 postgres-data/
