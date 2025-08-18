@@ -19,6 +19,7 @@ import org.viniciusvirgilli.dto.UsuarioAtualizacaoDto;
 import org.viniciusvirgilli.dto.UsuarioCriacaoDto;
 import org.viniciusvirgilli.dto.UsuarioResponseDto;
 import org.viniciusvirgilli.dto.LoginDto;
+import org.viniciusvirgilli.interceptor.RateLimit;
 import org.viniciusvirgilli.model.Usuario;
 import org.viniciusvirgilli.service.UsuarioService;
 import org.viniciusvirgilli.service.ValidaUsuarioService;
@@ -44,6 +45,7 @@ public class UsuarioResource {
 
     @POST
     @PermitAll
+    @RateLimit
     @Operation(summary = "Criar usuário", description = "Cria um novo usuário no sistema")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Usuário criado com sucesso",
@@ -75,6 +77,7 @@ public class UsuarioResource {
     @GET
     @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
     @SecurityRequirement(name = "jwt")
+    @RateLimit
     @Operation(summary = "Listar usuários", description = "Retorna uma lista com todos os usuários cadastrados")
     @APIResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDto.class)))
@@ -284,6 +287,7 @@ public class UsuarioResource {
     @POST
     @Path("/login")
     @PermitAll
+    @RateLimit
     @Operation(summary = "Autenticar usuário", description = "Autentica um usuário e retorna um token JWT")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Autenticação realizada com sucesso",

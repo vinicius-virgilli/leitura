@@ -12,7 +12,12 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "usuarios")
+@Table(name = "usuarios", 
+       indexes = {
+           @Index(name = "idx_usuario_email", columnList = "email"),
+           @Index(name = "idx_usuario_ativo", columnList = "ativo"),
+           @Index(name = "idx_usuario_perfil", columnList = "perfil")
+       })
 public class Usuario extends PanacheEntity {
 
     @Column(nullable = false, unique = true)

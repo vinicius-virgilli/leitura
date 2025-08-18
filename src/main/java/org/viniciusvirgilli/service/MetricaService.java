@@ -7,6 +7,9 @@ import org.viniciusvirgilli.dto.MetricaCriacaoDto;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
 import org.viniciusvirgilli.model.Metrica;
 import org.viniciusvirgilli.model.Usuario;
+import io.quarkus.cache.CacheResult;
+import io.quarkus.cache.CacheInvalidate;
+import io.quarkus.cache.CacheKey;
 
 import java.util.List;
 
@@ -17,6 +20,7 @@ public class MetricaService {
     UsuarioService usuarioService;
 
     @Transactional
+    @CacheInvalidate(cacheName = "metricas")
     public Metrica criarMetrica(MetricaCriacaoDto dto) {
         if (metricaJaExiste(dto.getCategoria())) {
             throw new IllegalArgumentException("A métrica já existe.");
@@ -34,7 +38,9 @@ public class MetricaService {
     }
 
     @Transactional
-    public Metrica criarMetrica(MetricaCriacaoDto dto, Long usuarioId) {
+    @CacheInvalidate(cacheName = "metricas")
+    @CacheInvalidate(cacheName = "metricas-por-usuario")
+    public Metrica criarMetrica(MetricaCriacaoDto dto, @CacheKey Long usuarioId) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         if (usuario == null) {
             throw new IllegalArgumentException("Usuário não encontrado.");
@@ -66,24 +72,29 @@ public class MetricaService {
     }
 
 
+    @CacheResult(cacheName = "metricas")
     public List<Metrica> listarTodos() {
         return Metrica.listAll();
     }
 
 
-    public Metrica buscarPorCategoria(CategoriaLivroEnum categoriaLivroEnum) {
+    @CacheResult(cacheName = "metrica-por-categoria")
+    public Metrica buscarPorCategoria(@CacheKey CategoriaLivroEnum categoriaLivroEnum) {
         return Metrica.find("categoria", categoriaLivroEnum).firstResult();
     }
 
-    public Metrica buscarPorCategoriaEUsuario(CategoriaLivroEnum categoriaLivroEnum, Long usuarioId) {
+    @CacheResult(cacheName = "metrica-por-categoria-usuario")
+    public Metrica buscarPorCategoriaEUsuario(@CacheKey CategoriaLivroEnum categoriaLivroEnum, @CacheKey Long usuarioId) {
         return Metrica.find("categoria = ?1 and usuario.id = ?2", categoriaLivroEnum, usuarioId).firstResult();
     }
 
-    public List<Metrica> listarPorUsuario(Long usuarioId) {
+    @CacheResult(cacheName = "metricas-por-usuario")
+    public List<Metrica> listarPorUsuario(@CacheKey Long usuarioId) {
         return Metrica.find("usuario.id", usuarioId).list();
     }
 
-    public List<Metrica> listarMetricasPorUsuario(Long usuarioId) {
+    @CacheResult(cacheName = "metricas-por-usuario")
+    public List<Metrica> listarMetricasPorUsuario(@CacheKey Long usuarioId) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         if (usuario == null) {
             throw new IllegalArgumentException("Usuário não encontrado.");
@@ -91,12 +102,15 @@ public class MetricaService {
         return Metrica.find("usuario.id", usuarioId).list();
     }
 
+    @CacheResult(cacheName = "metricas")
     public List<Metrica> listarMetricas() {
         return Metrica.listAll();
     }
 
     @Transactional
-    public void deletarMetrica(CategoriaLivroEnum categoriaLivroEnum) {
+    @CacheInvalidate(cacheName = "metricas")
+    @CacheInvalidate(cacheName = "metrica-por-categoria")
+    public void deletarMetrica(@CacheKey CategoriaLivroEnum categoriaLivroEnum) {
         Metrica metrica = buscarPorCategoria(categoriaLivroEnum);
         if (metrica != null) {
             metrica.delete();
@@ -106,7 +120,10 @@ public class MetricaService {
     }
 
     @Transactional
-    public void deletarMetrica(Long metricaId, Long usuarioId) {
+    @CacheInvalidate(cacheName = "metricas")
+    @CacheInvalidate(cacheName = "metricas-por-usuario")
+    @CacheInvalidate(cacheName = "metrica-por-categoria-usuario")
+    public void deletarMetrica(@CacheKey Long metricaId, @CacheKey Long usuarioId) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         if (usuario == null) {
             throw new IllegalArgumentException("Usuário não encontrado.");

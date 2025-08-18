@@ -13,7 +13,12 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "metricas")
+@Table(name = "metricas",
+       indexes = {
+           @Index(name = "idx_metrica_usuario", columnList = "usuario_id"),
+           @Index(name = "idx_metrica_categoria", columnList = "categoria"),
+           @Index(name = "idx_metrica_usuario_categoria", columnList = "usuario_id, categoria")
+       })
 public class Metrica extends PanacheEntity {
 
     @Enumerated(EnumType.STRING)

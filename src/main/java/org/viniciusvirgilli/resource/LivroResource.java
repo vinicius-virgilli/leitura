@@ -16,6 +16,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.LivroCriacaoDto;
 import org.viniciusvirgilli.enums.Perfil;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
+import org.viniciusvirgilli.interceptor.RateLimit;
 import org.viniciusvirgilli.model.Livro;
 import org.viniciusvirgilli.service.AtualizaProgressoLeituraService;
 import org.viniciusvirgilli.service.LivroService;
@@ -45,6 +46,7 @@ public class LivroResource {
     @Path("/usuario/{usuarioId}")
     @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
     @SecurityRequirement(name = "jwt")
+    @RateLimit(maxRequests = 50, timeWindowMinutes = 1)
     @Operation(summary = "Criar um novo livro", description = "Cria um novo livro no sistema para um usuário específico")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Livro criado com sucesso",
@@ -75,6 +77,7 @@ public class LivroResource {
     @GET
     @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
     @SecurityRequirement(name = "jwt")
+    @RateLimit
     @Operation(summary = "Listar todos os livros", description = "Retorna uma lista com todos os livros cadastrados")
     @APIResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class)))
@@ -88,6 +91,7 @@ public class LivroResource {
     @Path("/usuario/{usuarioId}")
     @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
     @SecurityRequirement(name = "jwt")
+    @RateLimit
     @Operation(summary = "Listar livros por usuário", description = "Retorna uma lista com todos os livros de um usuário específico")
     @APIResponse(responseCode = "200", description = "Lista de livros retornada com sucesso",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Livro.class)))

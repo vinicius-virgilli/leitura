@@ -15,7 +15,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "livros", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"nome", "usuario_id"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"nome", "usuario_id"}),
+       indexes = {
+           @Index(name = "idx_livro_usuario", columnList = "usuario_id"),
+           @Index(name = "idx_livro_status", columnList = "status"),
+           @Index(name = "idx_livro_categoria", columnList = "categoria"),
+           @Index(name = "idx_livro_usuario_status", columnList = "usuario_id, status"),
+           @Index(name = "idx_livro_usuario_categoria", columnList = "usuario_id, categoria")
+       })
 public class Livro extends PanacheEntity {
 
     @Column(nullable = false)

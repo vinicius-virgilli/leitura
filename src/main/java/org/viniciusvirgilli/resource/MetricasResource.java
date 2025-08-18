@@ -15,6 +15,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.MetricaCriacaoDto;
 import org.viniciusvirgilli.enums.CategoriaLivroEnum;
+import org.viniciusvirgilli.interceptor.RateLimit;
 import org.viniciusvirgilli.model.Metrica;
 import org.viniciusvirgilli.service.MetricaService;
 import org.viniciusvirgilli.service.ValidaMetricaService;
@@ -39,6 +40,7 @@ public class MetricasResource {
     @Path("/usuario/{usuarioId}")
     @RolesAllowed({"ADMIN", "MODERATOR", "USER"})
     @SecurityRequirement(name = "jwt")
+    @RateLimit(maxRequests = 30, timeWindowMinutes = 1)
     @Operation(summary = "Criar uma nova métrica para um usuário", description = "Cria uma nova métrica de leitura para uma categoria específica associada a um usuário")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Métrica criada com sucesso",
@@ -72,6 +74,7 @@ public class MetricasResource {
     @Path("/usuario/{usuarioId}")
     @RolesAllowed({"ADMIN", "MODERATOR", "USER"})
     @SecurityRequirement(name = "jwt")
+    @RateLimit
     @Operation(summary = "Listar métricas de um usuário", description = "Retorna uma lista de todas as métricas de leitura de um usuário específico")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Lista de métricas retornada com sucesso",
@@ -96,6 +99,7 @@ public class MetricasResource {
     @GET
     @RolesAllowed({"ADMIN", "MODERATOR"})
     @SecurityRequirement(name = "jwt")
+    @RateLimit
     @Operation(summary = "Listar todas as métricas (apenas ADMIN/MODERATOR)", description = "Retorna uma lista de todas as métricas de leitura de todos os usuários")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Lista de métricas retornada com sucesso",

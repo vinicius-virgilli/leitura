@@ -8,6 +8,9 @@ import org.viniciusvirgilli.enums.CategoriaLivroEnum;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
 import org.viniciusvirgilli.model.Livro;
 import org.viniciusvirgilli.model.Usuario;
+import io.quarkus.cache.CacheResult;
+import io.quarkus.cache.CacheInvalidate;
+import io.quarkus.cache.CacheKey;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +22,9 @@ public class LivroService {
     UsuarioService usuarioService;
 
     @Transactional
-    public Livro criarLivro(LivroCriacaoDto dto, Long usuarioId) {
+    @CacheInvalidate(cacheName = "livros")
+    @CacheInvalidate(cacheName = "livros-por-usuario")
+    public Livro criarLivro(LivroCriacaoDto dto, @CacheKey Long usuarioId) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         if (usuario == null) {
             throw new IllegalArgumentException("Usuário não encontrado.");
@@ -93,39 +98,48 @@ public class LivroService {
         return livro;
     }
 
+    @CacheResult(cacheName = "livros")
     public List<Livro> listarLivros() {
         return Livro.listAll();
     }
 
+    @CacheResult(cacheName = "livros")
     public List<Livro> listarTodos() {
         return Livro.listAll();
     }
 
-    public List<Livro> listarPorUsuario(Long usuarioId) {
+    @CacheResult(cacheName = "livros-por-usuario")
+    public List<Livro> listarPorUsuario(@CacheKey Long usuarioId) {
         return Livro.find("usuario.id", usuarioId).list();
     }
 
-    public Livro listarLivroPorId(Integer livroId) {
+    @CacheResult(cacheName = "livro-por-id")
+    public Livro listarLivroPorId(@CacheKey Integer livroId) {
         return Livro.find("id", livroId).firstResult();
     }
 
-    public Livro buscarPorIdEUsuario(Long id, Long usuarioId) {
+    @CacheResult(cacheName = "livro-por-id-usuario")
+    public Livro buscarPorIdEUsuario(@CacheKey Long id, @CacheKey Long usuarioId) {
         return Livro.find("id = ?1 and usuario.id = ?2", id, usuarioId).firstResult();
     }
 
-    public List<Livro> buscarPorStatus(StatusLeituraEnum status) {
+    @CacheResult(cacheName = "livros-por-status")
+    public List<Livro> buscarPorStatus(@CacheKey StatusLeituraEnum status) {
         return Livro.find("status", status).list();
     }
 
-    public List<Livro> buscarPorStatusEUsuario(StatusLeituraEnum status, Long usuarioId) {
+    @CacheResult(cacheName = "livros-por-status-usuario")
+    public List<Livro> buscarPorStatusEUsuario(@CacheKey StatusLeituraEnum status, @CacheKey Long usuarioId) {
         return Livro.find("status = ?1 and usuario.id = ?2", status, usuarioId).list();
     }
 
-    public List<Livro> buscarPorCategoria(CategoriaLivroEnum categoria) {
+    @CacheResult(cacheName = "livros-por-categoria")
+    public List<Livro> buscarPorCategoria(@CacheKey CategoriaLivroEnum categoria) {
         return Livro.find("categoria", categoria).list();
     }
 
-    public List<Livro> buscarPorCategoriaEUsuario(CategoriaLivroEnum categoria, Long usuarioId) {
+    @CacheResult(cacheName = "livros-por-categoria-usuario")
+    public List<Livro> buscarPorCategoriaEUsuario(@CacheKey CategoriaLivroEnum categoria, @CacheKey Long usuarioId) {
         return Livro.find("categoria = ?1 and usuario.id = ?2", categoria, usuarioId).list();
     }
 

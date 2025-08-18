@@ -7,6 +7,9 @@ import org.jboss.logging.Logger;
 import org.viniciusvirgilli.dto.UsuarioAtualizacaoDto;
 import org.viniciusvirgilli.dto.UsuarioCriacaoDto;
 import org.viniciusvirgilli.model.Usuario;
+import io.quarkus.cache.CacheResult;
+import io.quarkus.cache.CacheInvalidate;
+import io.quarkus.cache.CacheKey;
 
 import java.util.List;
 
@@ -19,6 +22,7 @@ public class UsuarioService {
     PasswordService passwordService;
 
     @Transactional
+    @CacheInvalidate(cacheName = "usuarios")
     public Usuario criarUsuario(UsuarioCriacaoDto dto) {
         LOG.info("[CRIAR_USUARIO] Iniciando criação de usuário com email: " + dto.getEmail());
         
@@ -52,15 +56,18 @@ public class UsuarioService {
         return Usuario.find("email", email).firstResult() != null;
     }
 
+    @CacheResult(cacheName = "usuarios")
     public List<Usuario> listarTodos() {
         return Usuario.listAll();
     }
 
+    @CacheResult(cacheName = "usuarios-ativos")
     public List<Usuario> listarAtivos() {
         return Usuario.find("ativo", true).list();
     }
 
-    public Usuario buscarPorId(Long usuarioId) {
+    @CacheResult(cacheName = "usuario-por-id")
+    public Usuario buscarPorId(@CacheKey Long usuarioId) {
         return Usuario.findById(usuarioId);
     }
 
@@ -70,7 +77,8 @@ public class UsuarioService {
      * @param email email do usuário
      * @return usuário encontrado ou null
      */
-    public Usuario buscarPorEmail(String email) {
+    @CacheResult(cacheName = "usuario-por-email")
+    public Usuario buscarPorEmail(@CacheKey String email) {
         LOG.infof("[BUSCA] Iniciando busca por email");
         LOG.infof("[BUSCA] Email recebido: %s", email);
         
@@ -148,7 +156,11 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario atualizarUsuario(Long usuarioId, UsuarioAtualizacaoDto dto) {
+    @CacheInvalidate(cacheName = "usuario-por-id")
+    @CacheInvalidate(cacheName = "usuario-por-email")
+    @CacheInvalidate(cacheName = "usuarios")
+    @CacheInvalidate(cacheName = "usuarios-ativos")
+    public Usuario atualizarUsuario(@CacheKey Long usuarioId, UsuarioAtualizacaoDto dto) {
         Usuario usuario = Usuario.findById(usuarioId);
         
         if (usuario == null) {
@@ -183,7 +195,9 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario desativarUsuario(Long usuarioId) {
+    @CacheInvalidate(cacheName = "usuario-por-id")
+    @CacheInvalidate(cacheName = "usuarios-ativos")
+    public Usuario desativarUsuario(@CacheKey Long usuarioId) {
         Usuario usuario = Usuario.findById(usuarioId);
         
         if (usuario == null) {
@@ -196,7 +210,9 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario ativarUsuario(Long usuarioId) {
+    @CacheInvalidate(cacheName = "usuario-por-id")
+    @CacheInvalidate(cacheName = "usuarios-ativos")
+    public Usuario ativarUsuario(@CacheKey Long usuarioId) {
         Usuario usuario = Usuario.findById(usuarioId);
         
         if (usuario == null) {
