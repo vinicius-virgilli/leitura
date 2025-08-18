@@ -23,7 +23,9 @@
 											"if (pm.response.code === 200) {",
 											"    var jsonData = pm.response.json();",
 											"    pm.environment.set('jwt_token', jsonData.token);",
-											"    console.log('Token JWT salvo automaticamente');",
+											"    pm.environment.set('user_id', jsonData.id);",
+											"    console.log('Token JWT e User ID salvos automaticamente');",
+											"    console.log('User ID: ' + jsonData.id);",
 											"}"
 										],
 										"type": "text/javascript"
@@ -42,7 +44,7 @@
 									"mode": "raw",
 									"raw": "{\n  \"email\": \"admin@leitura.com\",\n  \"senha\": \"admin123\"\n}"
 								},
-								"url": "{{localhost}}/login",
+								"url": "{{localhost}}/usuarios/login",
 								"description": "Endpoint para autenticação. Retorna um token JWT que será usado automaticamente nas próximas requisições."
 							},
 							"response": []
@@ -109,7 +111,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{localhost}}/usuarios/1",
+								"url": "{{localhost}}/usuarios/{{user_id}}",
 								"description": "Busca um usuário específico por ID. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
 							},
 							"response": []
@@ -125,7 +127,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{localhost}}/usuarios/email/joao@exemplo.com",
+								"url": "{{localhost}}/usuarios/email/admin@leitura.com",
 								"description": "Busca um usuário específico por email. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
 							},
 							"response": []
@@ -147,10 +149,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"nome\": \"João Silva Atualizado\",\n  \"email\": \"joao.atualizado@exemplo.com\",\n  \"perfil\": \"MODERATOR\"\n}"
+									"raw": "{\n  \"nome\": \"Admin User Atualizado\",\n  \"email\": \"admin.atualizado@leitura.com\",\n  \"perfil\": \"ADMIN\"\n}"
 								},
-								"url": "{{localhost}}/usuarios/1",
-								"description": "Atualiza dados de um usuário. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
+								"url": "{{localhost}}/usuarios/{{user_id}}",
+								"description": "Atualiza os dados de um usuário específico. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
 							},
 							"response": []
 						},
@@ -165,40 +167,8 @@
 										"type": "text"
 									}
 								],
-								"url": "{{localhost}}/usuarios/1",
-								"description": "Deleta um usuário. Requer autenticação JWT. Acesso: ADMIN apenas."
-							},
-							"response": []
-						},
-						{
-							"name": "Desativar Usuário",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}",
-										"type": "text"
-									}
-								],
-								"url": "{{localhost}}/usuarios/1/desativar",
-								"description": "Desativa um usuário (soft delete). Requer autenticação JWT. Acesso: ADMIN, MODERATOR."
-							},
-							"response": []
-						},
-						{
-							"name": "Ativar Usuário",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}",
-										"type": "text"
-									}
-								],
-								"url": "{{localhost}}/usuarios/1/ativar",
-								"description": "Reativa um usuário desativado. Requer autenticação JWT. Acesso: ADMIN, MODERATOR."
+								"url": "{{localhost}}/usuarios/{{user_id}}",
+								"description": "Remove um usuário do sistema. Requer autenticação JWT. Acesso: ADMIN apenas."
 							},
 							"response": []
 						}
@@ -224,10 +194,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"nome\": \"O Poder do Hábito\",\n  \"categoria\": \"INTELECTUAL\",\n  \"totalPaginas\": 300\n}"
+									"raw": "{\n  \"titulo\": \"O Poder do Hábito\",\n  \"autor\": \"Charles Duhigg\",\n  \"categoria\": \"INTELECTUAL\",\n  \"totalPaginas\": 408,\n  \"ordemDeLeitura\": 1,\n  \"usuarioId\": {{user_id}}\n}"
 								},
-								"url": "{{localhost}}/livros/usuario/1",
-								"description": "Cria um novo livro para um usuário. Categorias: INTELECTUAL, FICCAO, BIOGRAFIA, TECNICO, OUTROS. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
+								"url": "{{localhost}}/livros",
+								"description": "Cria um novo livro. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
 							},
 							"response": []
 						},
@@ -243,7 +213,7 @@
 									}
 								],
 								"url": "{{localhost}}/livros",
-								"description": "Lista todos os livros do sistema. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
+								"description": "Lista todos os livros cadastrados. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
 							},
 							"response": []
 						},
@@ -258,7 +228,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{localhost}}/livros/usuario/1",
+								"url": "{{localhost}}/livros/usuario/{{user_id}}",
 								"description": "Lista todos os livros de um usuário específico. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
 							},
 							"response": []
@@ -312,38 +282,6 @@
 							"response": []
 						},
 						{
-							"name": "Atualizar Saldo do Livro",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{localhost}}/livros/saldo/atualizar?livroId=1&saldo=50",
-									"host": ["{{localhost}}"],
-									"path": ["livros", "saldo", "atualizar"],
-									"query": [
-										{
-											"key": "livroId",
-											"value": "1",
-											"description": "ID do livro"
-										},
-										{
-											"key": "saldo",
-											"value": "50",
-											"description": "Páginas a adicionar ao saldo"
-										}
-									]
-								},
-								"description": "Atualiza o saldo de páginas restantes de um livro. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
-							},
-							"response": []
-						},
-						{
 							"name": "Deletar Livro",
 							"request": {
 								"method": "DELETE",
@@ -392,7 +330,7 @@
 					"name": "Métricas",
 					"item": [
 						{
-							"name": "Criar Métrica",
+							"name": "Criar Métrica para Usuário",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -408,15 +346,55 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"categoria\": \"INTELECTUAL\",\n  \"paginasPorDia\": 25\n}"
+									"raw": "{\n  \"categoria\": \"INTELECTUAL\",\n  \"dataBase\": \"2025-08-17\",\n  \"paginasPorDia\": 10,\n  \"diasSemanaLeitura\": [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\"]\n}"
 								},
-								"url": "{{localhost}}/metricas",
-								"description": "Cria uma nova métrica de leitura para uma categoria específica. Requer autenticação JWT. Acesso: ADMIN, MODERATOR."
+								"url": "{{localhost}}/metricas/usuario/{{user_id}}",
+								"description": "Cria uma nova métrica de leitura para uma categoria específica associada a um usuário. Categorias: INTELECTUAL, ESPIRITUAL. Requer autenticação JWT. Acesso: ADMIN, MODERATOR, USER."
 							},
 							"response": []
 						},
 						{
-							"name": "Listar Todas as Métricas",
+							"name": "Criar Métrica Espiritual",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"categoria\": \"ESPIRITUAL\",\n  \"dataBase\": \"2025-08-17\",\n  \"paginasPorDia\": 5,\n  \"diasSemanaLeitura\": [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\", \"SATURDAY\"]\n}"
+								},
+								"url": "{{localhost}}/metricas/usuario/{{user_id}}",
+								"description": "Cria uma nova métrica de leitura espiritual (exemplo com 6 dias por semana). Requer autenticação JWT. Acesso: ADMIN, MODERATOR, USER."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Métricas do Usuário",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{localhost}}/metricas/usuario/{{user_id}}",
+								"description": "Lista todas as métricas de leitura de um usuário específico. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Todas as Métricas (Admin)",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -427,12 +405,12 @@
 									}
 								],
 								"url": "{{localhost}}/metricas",
-								"description": "Lista todas as métricas de leitura cadastradas. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
+								"description": "Lista todas as métricas de leitura de todos os usuários. Requer autenticação JWT. Acesso: ADMIN, MODERATOR apenas."
 							},
 							"response": []
 						},
 						{
-							"name": "Deletar Métrica por Categoria",
+							"name": "Deletar Métrica do Usuário",
 							"request": {
 								"method": "DELETE",
 								"header": [
@@ -442,19 +420,8 @@
 										"type": "text"
 									}
 								],
-								"url": {
-									"raw": "{{localhost}}/metricas?categoria=INTELECTUAL",
-									"host": ["{{localhost}}"],
-									"path": ["metricas"],
-									"query": [
-										{
-											"key": "categoria",
-											"value": "INTELECTUAL",
-											"description": "Categoria: INTELECTUAL, FICCAO, BIOGRAFIA, TECNICO, OUTROS"
-										}
-									]
-								},
-								"description": "Remove uma métrica específica baseada na categoria do livro. Requer autenticação JWT. Acesso: ADMIN apenas."
+								"url": "{{localhost}}/metricas/usuario/{{user_id}}/2",
+								"description": "Remove uma métrica específica de um usuário. Substitua '2' pelo ID da métrica desejada. Requer autenticação JWT. Acesso: ADMIN, USER, MODERATOR."
 							},
 							"response": []
 						}
@@ -523,7 +490,9 @@
 											"if (pm.response.code === 200) {",
 											"    var jsonData = pm.response.json();",
 											"    pm.environment.set('jwt_token', jsonData.token);",
-											"    console.log('Token JWT salvo automaticamente');",
+											"    pm.environment.set('user_id', jsonData.id);",
+											"    console.log('Token JWT e User ID salvos automaticamente');",
+											"    console.log('User ID: ' + jsonData.id);",
 											"}"
 										],
 										"type": "text/javascript"
@@ -542,7 +511,7 @@
 									"mode": "raw",
 									"raw": "{\n  \"email\": \"admin@leitura.com\",\n  \"senha\": \"admin123\"\n}"
 								},
-								"url": "{{production}}/login",
+								"url": "{{production}}/usuarios/login",
 								"description": "Endpoint para autenticação em produção. Retorna um token JWT."
 							},
 							"response": []
@@ -584,6 +553,376 @@
 								],
 								"url": "{{production}}/usuarios",
 								"description": "Lista usuários em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar Usuário por ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/usuarios/{{user_id}}",
+								"description": "Busca um usuário específico por ID em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar Usuário por Email",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/usuarios/email/admin@leitura.com",
+								"description": "Busca um usuário específico por email em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Usuário",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"Admin User Atualizado\",\n  \"email\": \"admin.atualizado@leitura.com\",\n  \"perfil\": \"ADMIN\"\n}"
+								},
+								"url": "{{production}}/usuarios/{{user_id}}",
+								"description": "Atualiza os dados de um usuário específico em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar Usuário",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/usuarios/{{user_id}}",
+								"description": "Remove um usuário do sistema em produção. Requer autenticação JWT. Acesso: ADMIN apenas."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Livros",
+					"item": [
+						{
+							"name": "Criar Livro",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"titulo\": \"O Poder do Hábito\",\n  \"autor\": \"Charles Duhigg\",\n  \"categoria\": \"INTELECTUAL\",\n  \"totalPaginas\": 408,\n  \"ordemDeLeitura\": 1,\n  \"usuarioId\": {{user_id}}\n}"
+								},
+								"url": "{{production}}/livros",
+								"description": "Cria um novo livro em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Todos os Livros",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/livros",
+								"description": "Lista todos os livros cadastrados em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Livros por Usuário",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/livros/usuario/{{user_id}}",
+								"description": "Lista todos os livros de um usuário específico em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Buscar Livro por ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/livros/1",
+								"description": "Busca um livro específico por ID em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Status do Livro",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{production}}/livros/status/atualizar?livroId=1&status=LENDO",
+									"host": ["{{production}}"],
+									"path": ["livros", "status", "atualizar"],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1",
+											"description": "ID do livro"
+										},
+										{
+											"key": "status",
+											"value": "LENDO",
+											"description": "Status: A_LER, LENDO, LIDO"
+										}
+									]
+								},
+								"description": "Atualiza o status de leitura de um livro em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar Livro",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{production}}/livros?livroId=1",
+									"host": ["{{production}}"],
+									"path": ["livros"],
+									"query": [
+										{
+											"key": "livroId",
+											"value": "1",
+											"description": "ID do livro a ser deletado"
+										}
+									]
+								},
+								"description": "Remove um livro do sistema em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Progresso Manual",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/livros/progresso/atualizar",
+								"description": "Executa manualmente a atualização do progresso de leitura de todos os livros em produção. Requer autenticação JWT."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Métricas",
+					"item": [
+						{
+							"name": "Criar Métrica para Usuário",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"categoria\": \"INTELECTUAL\",\n  \"dataBase\": \"2025-08-17\",\n  \"paginasPorDia\": 10,\n  \"diasSemanaLeitura\": [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\"]\n}"
+								},
+								"url": "{{production}}/metricas/usuario/{{user_id}}",
+								"description": "Cria uma nova métrica de leitura para uma categoria específica associada a um usuário em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Criar Métrica Espiritual",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"categoria\": \"ESPIRITUAL\",\n  \"dataBase\": \"2025-08-17\",\n  \"paginasPorDia\": 5,\n  \"diasSemanaLeitura\": [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\", \"SATURDAY\"]\n}"
+								},
+								"url": "{{production}}/metricas/usuario/{{user_id}}",
+								"description": "Cria uma nova métrica de leitura espiritual em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Métricas do Usuário",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/metricas/usuario/{{user_id}}",
+								"description": "Lista todas as métricas de leitura de um usuário específico em produção. Requer autenticação JWT."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Todas as Métricas (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/metricas",
+								"description": "Lista todas as métricas de leitura de todos os usuários em produção. Requer autenticação JWT. Acesso: ADMIN, MODERATOR apenas."
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar Métrica do Usuário",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{production}}/metricas/usuario/{{user_id}}/2",
+								"description": "Remove uma métrica específica de um usuário em produção. Requer autenticação JWT."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Health Check",
+					"item": [
+						{
+							"name": "Health",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/health",
+								"description": "Verifica o status geral da aplicação em produção. Endpoint público."
+							},
+							"response": []
+						},
+						{
+							"name": "Health Live",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/health/live",
+								"description": "Verifica se a aplicação está viva (liveness probe) em produção. Endpoint público."
+							},
+							"response": []
+						},
+						{
+							"name": "Health Ready",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/health/ready",
+								"description": "Verifica se a aplicação está pronta para receber requisições (readiness probe) em produção. Endpoint público."
+							},
+							"response": []
+						},
+						{
+							"name": "Métricas Prometheus",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{production}}/metrics",
+								"description": "Endpoint de métricas do Prometheus para monitoramento em produção. Endpoint público."
 							},
 							"response": []
 						}
@@ -652,6 +991,12 @@
 			"value": "",
 			"type": "string",
 			"description": "Token JWT obtido após login - preenchido automaticamente"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string",
+			"description": "ID do usuário logado - preenchido automaticamente após login"
 		}
 	]
 }

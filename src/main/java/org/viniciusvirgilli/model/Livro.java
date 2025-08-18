@@ -14,10 +14,11 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "livros")
+@Table(name = "livros", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"nome", "usuario_id"}))
 public class Livro extends PanacheEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String nome;
 
     @Column(nullable = false)

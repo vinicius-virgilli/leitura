@@ -14,6 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.viniciusvirgilli.dto.LivroCriacaoDto;
+import org.viniciusvirgilli.enums.Perfil;
 import org.viniciusvirgilli.enums.StatusLeituraEnum;
 import org.viniciusvirgilli.model.Livro;
 import org.viniciusvirgilli.service.AtualizaProgressoLeituraService;
@@ -147,7 +148,7 @@ public class LivroResource {
 
     @POST
     @Path("/progresso/atualizar")
-    @RolesAllowed({"ADMIN", "MODERATOR"})
+    @RolesAllowed({"USER", "ADMIN", "MODERATOR"})
     @SecurityRequirement(name = "jwt")
     @Operation(summary = "Atualizar progresso manualmente", description = "Executa manualmente a atualização do progresso de leitura de todos os livros")
     @APIResponses(value = {
@@ -165,6 +166,32 @@ public class LivroResource {
             return Response.ok("Progresso dos livros atualizado com sucesso!").build();
         } catch (Exception e) {
             LOG.error("Erro ao atualizar progresso dos livros manualmente", e);
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    @POST
+    @Path("/progresso/atualizar/usuario/{usuarioId}")
+    @RolesAllowed({"USER", "ADMIN", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
+    @Operation(summary = "Atualizar progresso por usuário", description = "Executa manualmente a atualização do progresso de leitura dos livros de um usuário específico")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Progresso atualizado com sucesso"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response atualizarProgressoPorUsuario(
+            @Parameter(description = "ID do usuário", required = true) @PathParam("usuarioId") Long usuarioId) {
+        try {
+            LOG.infof("Requisição manual para atualizar progresso dos livros do usuário: %d", usuarioId);
+
+            atualizaProgressoLeituraService.atualizarProgressoDosLivrosPorUsuario(usuarioId);
+
+            LOG.infof("Progresso dos livros do usuário %d atualizado com sucesso", usuarioId);
+
+            return Response.ok(String.format("Progresso dos livros do usuário %d atualizado com sucesso!", usuarioId)).build();
+        } catch (Exception e) {
+            LOG.errorf("Erro ao atualizar progresso dos livros do usuário %d", usuarioId, e);
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }

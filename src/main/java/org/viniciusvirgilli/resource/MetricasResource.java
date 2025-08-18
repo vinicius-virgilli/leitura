@@ -36,22 +36,26 @@ public class MetricasResource {
     MetricaService metricaService;
 
     @POST
-    @RolesAllowed({"ADMIN", "MODERATOR"})
+    @Path("/usuario/{usuarioId}")
+    @RolesAllowed({"ADMIN", "MODERATOR", "USER"})
     @SecurityRequirement(name = "jwt")
-    @Operation(summary = "Criar uma nova métrica", description = "Cria uma nova métrica de leitura para uma categoria específica")
+    @Operation(summary = "Criar uma nova métrica para um usuário", description = "Cria uma nova métrica de leitura para uma categoria específica associada a um usuário")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Métrica criada com sucesso",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Metrica.class))),
         @APIResponse(responseCode = "400", description = "Dados inválidos"),
+        @APIResponse(responseCode = "404", description = "Usuário não encontrado"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
     })
-    public Response criarMetrica(MetricaCriacaoDto metrica) {
+    public Response criarMetrica(
+            @Parameter(description = "ID do usuário", required = true)
+            @PathParam("usuarioId") Long usuarioId,
+            MetricaCriacaoDto metrica) {
         try {
-
-            LOG.infof("Requisição recebida para criar métrica da categoria: %s", metrica.getCategoria());
-            validaMetricaService.validarCriacao(metrica);
-            Metrica criado = metricaService.criarMetrica(metrica);
-            LOG.infof("Métrica criada com sucesso para a categoria: %s", criado.getCategoria());
+            LOG.infof("Requisição recebida para criar métrica da categoria: %s para usuário: %d", metrica.getCategoria(), usuarioId);
+            validaMetricaService.validarCriacao(metrica, usuarioId);
+            Metrica criado = metricaService.criarMetrica(metrica, usuarioId);
+            LOG.infof("Métrica criada com sucesso para a categoria: %s e usuário: %d", criado.getCategoria(), usuarioId);
             return Response.status(Response.Status.CREATED).entity(criado).build();
 
         } catch (IllegalArgumentException e) {
@@ -65,35 +69,81 @@ public class MetricasResource {
 
 
     @GET
-    @RolesAllowed({"ADMIN", "USER", "MODERATOR"})
+    @Path("/usuario/{usuarioId}")
+    @RolesAllowed({"ADMIN", "MODERATOR", "USER"})
     @SecurityRequirement(name = "jwt")
-    @Operation(summary = "Listar todas as métricas", description = "Retorna uma lista com todas as métricas de leitura cadastradas")
-    @APIResponse(responseCode = "200", description = "Lista de métricas retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Metrica.class)))
-    public List<Metrica> listarMetricas() {
-        LOG.info("Requisição para listar todas as métricas recebida.");
-        return metricaService.listarTodos();
+    @Operation(summary = "Listar métricas de um usuário", description = "Retorna uma lista de todas as métricas de leitura de um usuário específico")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Lista de métricas retornada com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Metrica.class))),
+        @APIResponse(responseCode = "404", description = "Usuário não encontrado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response listarMetricasPorUsuario(
+            @Parameter(description = "ID do usuário", required = true)
+            @PathParam("usuarioId") Long usuarioId) {
+        try {
+            LOG.infof("Requisição recebida para listar métricas do usuário: %d", usuarioId);
+            List<Metrica> metricas = metricaService.listarMetricasPorUsuario(usuarioId);
+            LOG.infof("Retornando %d métricas para o usuário: %d", metricas.size(), usuarioId);
+            return Response.ok(metricas).build();
+        } catch (Exception e) {
+            LOG.errorf("Erro interno ao listar métricas do usuário %d: %s", usuarioId, e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @RolesAllowed({"ADMIN", "MODERATOR"})
+    @SecurityRequirement(name = "jwt")
+    @Operation(summary = "Listar todas as métricas (apenas ADMIN/MODERATOR)", description = "Retorna uma lista de todas as métricas de leitura de todos os usuários")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Lista de métricas retornada com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Metrica.class))),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response listarTodasMetricas() {
+        try {
+            LOG.info("Requisição recebida para listar todas as métricas (admin/moderator)");
+            List<Metrica> metricas = metricaService.listarTodos();
+            LOG.infof("Retornando %d métricas", metricas.size());
+            return Response.ok(metricas).build();
+        } catch (Exception e) {
+            LOG.errorf("Erro interno ao listar métricas: %s", e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
     }
 
 
     @DELETE
-    @RolesAllowed({"ADMIN"})
+    @Path("/usuario/{usuarioId}/{id}")
+    @RolesAllowed({"ADMIN", "MODERATOR", "USER"})
     @SecurityRequirement(name = "jwt")
-    @Operation(summary = "Deletar métrica por categoria", description = "Remove uma métrica específica baseada na categoria do livro")
+    @Operation(summary = "Deletar uma métrica de um usuário", description = "Remove uma métrica específica pelo ID associada a um usuário")
     @APIResponses(value = {
-        @APIResponse(responseCode = "200", description = "Métrica deletada com sucesso"),
+        @APIResponse(responseCode = "204", description = "Métrica deletada com sucesso"),
+        @APIResponse(responseCode = "404", description = "Métrica ou usuário não encontrado"),
+        @APIResponse(responseCode = "403", description = "Métrica não pertence ao usuário especificado"),
         @APIResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     public Response deletarMetrica(
-            @Parameter(description = "Categoria do livro para deletar a métrica", required = true)
-            @QueryParam("categoria") CategoriaLivroEnum categoria) {
+            @Parameter(description = "ID do usuário", required = true)
+            @PathParam("usuarioId") Long usuarioId,
+            @Parameter(description = "ID da métrica a ser deletada", required = true)
+            @PathParam("id") Long id) {
         try {
-            LOG.infof("Requisição para deletar métrica da categoria: %s", categoria);
-            metricaService.deletarMetrica(categoria);
-            LOG.infof("Métrica deletada com sucesso para a categoria: %s", categoria);
-            return Response.ok("Metrica deletada com sucesso!").build();
+            LOG.infof("Requisição recebida para deletar métrica com ID: %d do usuário: %d", id, usuarioId);
+            metricaService.deletarMetrica(id, usuarioId);
+            LOG.infof("Métrica com ID %d do usuário %d deletada com sucesso", id, usuarioId);
+            return Response.noContent().build();
+        } catch (IllegalArgumentException e) {
+            LOG.warnf("Métrica com ID %d do usuário %d não encontrada: %s", id, usuarioId, e.getMessage());
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (SecurityException e) {
+            LOG.warnf("Métrica com ID %d não pertence ao usuário %d: %s", id, usuarioId, e.getMessage());
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
         } catch (Exception e) {
-            LOG.errorf("Erro ao deletar métrica da categoria %s: %s", categoria, e.getMessage());
+            LOG.errorf("Erro interno ao deletar métrica com ID %d do usuário %d: %s", id, usuarioId, e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }

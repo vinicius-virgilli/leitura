@@ -83,6 +83,17 @@ public class MetricaService {
         return Metrica.find("usuario.id", usuarioId).list();
     }
 
+    public List<Metrica> listarMetricasPorUsuario(Long usuarioId) {
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuário não encontrado.");
+        }
+        return Metrica.find("usuario.id", usuarioId).list();
+    }
+
+    public List<Metrica> listarMetricas() {
+        return Metrica.listAll();
+    }
 
     @Transactional
     public void deletarMetrica(CategoriaLivroEnum categoriaLivroEnum) {
@@ -92,5 +103,24 @@ public class MetricaService {
         } else {
             throw new IllegalArgumentException("Métrica não encontrada.");
         }
+    }
+
+    @Transactional
+    public void deletarMetrica(Long metricaId, Long usuarioId) {
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuário não encontrado.");
+        }
+
+        Metrica metrica = Metrica.findById(metricaId);
+        if (metrica == null) {
+            throw new IllegalArgumentException("Métrica não encontrada.");
+        }
+
+        if (!metrica.getUsuario().id.equals(usuarioId)) {
+            throw new SecurityException("Métrica não pertence ao usuário especificado.");
+        }
+
+        metrica.delete();
     }
 }
